@@ -5,7 +5,7 @@ dotenv.config();
 module.exports = {
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT || 5500,
-  BASE_URL: process.env.BASE_URL || 5500,
+  BASE_URL: process.env.BASE_URL || 'http://localhost',
   DATABASE: {
     USERNAME: process.env.DATABASE_USERNAME,
     PASSWORD: process.env.DATABASE_PASSWORD,

@@ -29,15 +29,10 @@ const logError = (message) => {
   logger.error(`Error: ${message}`);
 };
 
-// Log server start
-const logServerStart = (port) => {
-  logger.info(`Server running on http://localhost:${port}`);
-};
 
 module.exports = {
   logger,
   logHttp,
   logValidationError,
-  logError,
-  logServerStart,
+  logError
 };
