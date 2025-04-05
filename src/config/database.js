@@ -1,34 +1,33 @@
 const { Sequelize } = require('sequelize');
-const dotenv = require('dotenv');
+const { DATABASE, NODE_ENV } = require('./index');
 
-dotenv.config();
-
+// Initialize Sequelize using the centralized configuration
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
+  DATABASE.NAME,
+  DATABASE.USERNAME,
+  DATABASE.PASSWORD,
   {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: process.env.DB_DIALECT,
-    logging: false, // Disable SQL logging
+    host: DATABASE.HOST,
+    port: parseInt(DATABASE.PORT, 10),
+    dialect: DATABASE.DIALECT,
+    logging: false,
   }
 );
 
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connected successfully.');
+    console.log(`[INFO] Database connected successfully in "${NODE_ENV}" environment.`);
 
-    // Check if sync is enabled in the environment
-    if (process.env.DB_SYNC === 'true') {
-      await sequelize.sync({ alter: true }); // Automatically update table
-      console.log('Database synchronized.');
+    // Check if sync is enabled
+    if (DATABASE.DB_SYNC === 'true') {
+      await sequelize.sync({ alter: true });
+      console.log('[INFO] Database synchronized.');
     }
 
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
-    process.exit(1); // Exit on failure
+    console.error(`[ERROR] Unable to connect to the database: ${error.message}`);
+    process.exit(1);
   }
 };
 
