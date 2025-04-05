@@ -10,7 +10,12 @@ const sequelize = new Sequelize(
     host: DATABASE.HOST,
     port: parseInt(DATABASE.PORT, 10),
     dialect: DATABASE.DIALECT,
-    logging: false,
+    logging: false, // Disable SQL logging
+    define: {
+      underscored: true, // Convert camelCase to snake_case
+      freezeTableName: true, // Prevent table name pluralization
+      timestamps: true, // Automatically manage createdAt and updatedAt
+    },
   }
 );
 
@@ -20,7 +25,7 @@ const connectDB = async () => {
     console.log(`[INFO] Database connected successfully in "${NODE_ENV}" environment.`);
 
     // Check if sync is enabled
-    if (DATABASE.DATABASE_SYNC === 'true') {
+    if (DATABASE.SYNC === 'true') {
       await sequelize.sync({ alter: true });
       console.log('[INFO] Database synchronized.');
     }
