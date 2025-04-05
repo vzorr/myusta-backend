@@ -7,13 +7,13 @@ module.exports = {
   PORT: process.env.PORT || 5500,
   BASE_URL: process.env.BASE_URL || 5500,
   DATABASE: {
-    USERNAME: process.env.DB_USER,
-    PASSWORD: process.env.DB_PASS,
-    NAME: process.env.DB_NAME,
-    HOST: process.env.DB_HOST,
-    PORT: process.env.DB_PORT,
-    DIALECT: process.env.DB_DIALECT,
-    SYNC: process.env.DB_SYNC
+    USERNAME: process.env.DATABASE_USERNAME,
+    PASSWORD: process.env.DATABASE_PASSWORD,
+    NAME: process.env.DATABASE_NAME,
+    HOST: process.env.DATABASE_HOST,
+    PORT: process.env.DATABASE_PORT,
+    DIALECT: process.env.DATABASE_DIALECT,
+    SYNC: process.env.DATABASE_SYNC
   },
   JWT: {
     SECRET_KEY: process.env.SECRET_KEY,

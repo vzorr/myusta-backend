@@ -20,7 +20,7 @@ const connectDB = async () => {
     console.log(`[INFO] Database connected successfully in "${NODE_ENV}" environment.`);
 
     // Check if sync is enabled
-    if (DATABASE.DB_SYNC === 'true') {
+    if (DATABASE.DATABASE_SYNC === 'true') {
       await sequelize.sync({ alter: true });
       console.log('[INFO] Database synchronized.');
     }

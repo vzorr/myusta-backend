@@ -14,12 +14,12 @@ const checkEnvVar = (value, name) => {
 
 // Validate required environment variables
 try {
-  checkEnvVar(DATABASE.USERNAME, 'DB_USER');
-  checkEnvVar(DATABASE.PASSWORD, 'DB_PASS');
-  checkEnvVar(DATABASE.NAME, 'DB_NAME');
-  checkEnvVar(DATABASE.HOST, 'DB_HOST');
-  checkEnvVar(DATABASE.PORT, 'DB_PORT');
-  checkEnvVar(DATABASE.DIALECT, 'DB_DIALECT');
+  checkEnvVar(DATABASE.USERNAME, 'DATABASE_USERNAME');
+  checkEnvVar(DATABASE.PASSWORD, 'DATABASE_PASSWORD');
+  checkEnvVar(DATABASE.NAME, 'DATABASE_NAME');
+  checkEnvVar(DATABASE.HOST, 'DATABASE_HOST');
+  checkEnvVar(DATABASE.PORT, 'DATABASE_PORT');
+  checkEnvVar(DATABASE.DIALECT, 'DATABASE_DIALECT');
 } catch (error) {
   console.error(`\x1b[31m${error.message}\x1b[0m`);
   process.exit(1);
