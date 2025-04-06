@@ -1,0 +1,174 @@
+const { User, Verification } = require('../models');
+const { generateOTP, getExpiryTime } = require('../utils/common');
+const { generateToken } = require('../helpers/jwt');
+const { logError, logger } = require('../utils/logger');
+
+
+exports.signup = async ({ identifier, signupMethod }) => {
+  try {
+    let user = await User.findOne({ where: { [signupMethod]: identifier } });
+
+    if (user) {
+      const isVerified = signupMethod === 'email' ? user.emailVerified : user.phoneVerified;
+      if (isVerified) {
+        return {
+          success: false,
+          message: `This ${signupMethod} is already registered and verified.`,
+          errors: [`${signupMethod} already exists`],
+        };
+      }
+    }
+
+    if (!user) {
+      user = await User.create({
+        [signupMethod]: identifier,
+        authProvider: signupMethod,
+        role: 'customer',
+      });
+    }
+
+    // Generate JWT token
+    const token = generateToken({ id: user.id  });
+
+    const otp = generateOTP();
+    const expiresAt = getExpiryTime();
+
+    await Verification.upsert({
+      userId: user.id,
+      code: otp,
+      type: signupMethod,
+      expiresAt,
+    });
+
+    return {
+      success: true,
+      message: 'Sign-up successful. OTP sent.',
+      data: { userId: user.id, otp, token },
+    };
+  } catch (error) {
+    return { success: false, message: 'Sign-up failed.', errors: [error.message] };
+  }
+};
+
+exports.signupResend = async (currentUser) => {
+  try {
+    const { id: userId, authProvider, emailVerified, phoneVerified } = currentUser;
+
+    // Check verification status based on type
+    const isVerified = authProvider === 'email' ? emailVerified : phoneVerified;
+    if (isVerified) {
+      return { success: false, message: `User already verified with ${authProvider}`, errors: [], code: 409 };
+    }
+
+    // Find existing OTP
+    const verification = await Verification.findOne({ where: { userId, type: authProvider } });
+
+    if (verification) {
+
+      // Update OTP and expiry time
+      const newOtp = generateOTP();
+      const newExpiryTime = getExpiryTime();
+
+      verification.code = newOtp;
+      verification.expiresAt = newExpiryTime;
+      await verification.save();
+
+      return { success: true, message: 'OTP resent successfully', data: { otp: newOtp } };
+    }
+
+    // If no existing OTP, create a new one
+    const otp = generateOTP();
+    const expiresAt = getExpiryTime();
+
+    await Verification.create({ userId, code: otp, type, expiresAt });
+
+    return { success: true, message: 'OTP generated and sent successfully', data: { otp } };
+  } catch (error) {
+    console.error('Error in signupResend service:', error);
+    return { success: false, message: error.message };
+  }
+};
+
+exports.signupVerify = async (data) => {
+  try {
+
+    const { userId, code, authProvider } = data;
+
+    // Find the OTP record associated with the user
+    const verification = await Verification.findOne({ where: { userId, code } });
+
+    if (!verification || new Date() > verification.expiresAt) {
+      return { success: false, message: 'Invalid or expired OTP', errors: [], code: 401 };
+    }
+
+    // Update user verification status
+    const updateData = { status: 'inprogress' };
+    if (authProvider === 'email') {
+      updateData.emailVerified = true;
+    } else if (authProvider === 'phone') {
+      updateData.phoneVerified = true;
+    }
+
+    await User.update(updateData, { where: { id: userId } });
+
+    // Remove the OTP record after successful verification
+    await verification.destroy();
+
+    // Fetch updated user details
+    const user = await User.findByPk(userId);
+
+    return {
+      success: true,
+      message: 'User verified successfully',
+      data: {
+        userId: user.id,
+        email: user.email,
+        phone: user.phone,
+        status: user.status,
+      },
+    };
+  } catch (error) {
+    logError(error);
+    return { success: false, message: error.message };
+  }
+};
+
+
+exports.verifyOTP = async (userId, otp, type) => {
+  try {
+    const verification = await Verification.findOne({ where: { userId, type, code: otp } });
+
+    if (!verification || new Date() > verification.expiresAt) {
+      return { success: false, message: 'Invalid or expired OTP' };
+    }
+
+    await verification.destroy();
+    await User.update({ [`${type}Verified`]: true }, { where: { id: userId } });
+
+    return { success: true, data: { verified: true } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+exports.resendOTP = async (userId, type) => {
+  try {
+    const otp = generateOTP();
+    const expiresAt = getExpiryTime();
+
+    await Verification.upsert({ userId, code: otp, type, expiresAt });
+
+    return { success: true, data: { otp } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+exports.selectRole = async (userId, role) => {
+  try {
+    await User.update({ role }, { where: { id: userId } });
+    return { success: true, data: { role } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};

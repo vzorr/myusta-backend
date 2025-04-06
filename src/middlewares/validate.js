@@ -7,16 +7,21 @@ const validate = (schema) => (req, res, next) => {
 
   if (error) {
     const errors = error.details.map((detail) => {
-      // Handle the "not allowed" error separately
+      // Custom handling for "not allowed" errors
       if (detail.type === 'object.unknown') {
-      return `${detail.context.key} is not allowed`;
-    }
-    return detail.message;
+        return `${detail.context.key} is not allowed`;
+      }
+      return detail.message;
     });
-    logValidationError(errors.join(', '));
+
+    // Log the validation errors
+    logValidationError(`Validation Failed: ${errors.join(', ')}`);
+
+    // Return error response
     return errorResponse(res, 'Validation error', errors, 400);
   }
 
+  // Replace request body with validated and sanitized value
   req.body = value;
   next();
 };

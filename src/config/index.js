@@ -16,6 +16,7 @@ module.exports = {
     SYNC: process.env.DATABASE_SYNC
   },
   JWT: {
-    SECRET_KEY: process.env.SECRET_KEY,
+    SECRET_KEY: process.env.JWT_SECRET_KEY,
+    EXPIRES_IN: process.env.JWT_EXPIRATION_TIME,
   }
 }

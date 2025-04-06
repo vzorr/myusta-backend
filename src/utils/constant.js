@@ -5,6 +5,7 @@ module.exports.ROLES = {
   
   module.exports.STATUS = {
     ACTIVE: 'active',
+    INPROGRESS: 'inprogress',
     INACTIVE: 'inactive',
     BLOCKED: 'blocked',
   }

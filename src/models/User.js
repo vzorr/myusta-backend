@@ -10,11 +10,11 @@ module.exports = (sequelize) => {
     },
     firstName: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     lastName: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,
@@ -44,11 +44,12 @@ module.exports = (sequelize) => {
     },
     role: {
       type: DataTypes.ENUM(...Object.values(ROLES)),
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null,
     },
     status: {
       type: DataTypes.ENUM(...Object.values(STATUS)),
-      defaultValue: 'active',
+      defaultValue: STATUS.INACTIVE,
     },
   }, {
     indexes: [
