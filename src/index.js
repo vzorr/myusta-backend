@@ -6,6 +6,7 @@ const { connectDB } = require('./config/database');
 const routes = require('./routes');
 const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
 const { logger, logHttp, logServerStart } = require('./utils/logger');
+const { BASE_URL } = require('./config/index');
 
 dotenv.config();
 
@@ -39,7 +40,7 @@ app.use(errorHandler);
 const startServer = async () => {
   await connectDB();
   app.listen(PORT, () => {
-    logServerStart(PORT);
+    logger.info(`Server running on ${BASE_URL}:${PORT}`);
   });
 };
 

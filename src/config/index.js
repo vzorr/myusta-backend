@@ -5,7 +5,7 @@ dotenv.config();
 module.exports = {
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT || 5500,
-  BASE_URL: process.env.BASE_URL || 5500,
+  BASE_URL: process.env.BASE_URL || 'http://localhost',
   DATABASE: {
     USERNAME: process.env.DATABASE_USERNAME,
     PASSWORD: process.env.DATABASE_PASSWORD,
@@ -16,6 +16,14 @@ module.exports = {
     SYNC: process.env.DATABASE_SYNC
   },
   JWT: {
-    SECRET_KEY: process.env.SECRET_KEY,
-  }
+    SECRET_KEY: process.env.JWT_SECRET_KEY,
+    EXPIRES_IN: process.env.JWT_EXPIRATION_TIME,
+  },
+  EMAIL: {
+    SERVICE: process.env.MAIL_SERVICE,
+    USER: process.env.MAIL_USER,
+    PASSWORD: process.env.MAIL_PASSWORD,
+    HOST: process.env.MAIL_HOST,
+    PORT: process.env.MAIL_PORT,
+  },
 }

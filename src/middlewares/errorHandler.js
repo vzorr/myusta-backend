@@ -5,11 +5,15 @@ const { logger, logError, logValidationError } = require('../utils/logger');
 const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
-  const errors = err.errors || [];
+  const errors = Array.isArray(err.errors) ? err.errors : [err.message];
 
-  // Log the error
-  logError(`${message} | Details: ${errors.join(', ')}`);
-  
+  // Log the error in a more readable format
+  if (statusCode >= 400 && statusCode < 500) {
+    logValidationError(`Client Error: ${message} | Details: ${errors.join(', ')}`);
+  } else {
+    logError(`Server Error: ${message} | Details: ${errors.join(', ')}`);
+  }
+
   return errorResponse(res, message, errors, statusCode);
 };
 
