@@ -4,6 +4,7 @@ const { generateOTP, getExpiryTime } = require('../utils/common');
 const { generateToken } = require('../helpers/jwt');
 const { sendOtpEmail } = require('../helpers/email.helpers')
 const { logError, logger } = require('../utils/logger');
+const { log } = require('winston');
 
 
 
@@ -49,17 +50,31 @@ exports.login = async (email, password) => {
 };
 
 
-exports.signup = async ({ identifier, signupMethod }) => {
+exports.signup = async ({ identifier, signupMethod, role }) => {
   try {
-    let user = await User.findOne({ where: { [signupMethod]: identifier } });
+    let user = await User.findOne({ where: { [signupMethod]: identifier, role } });
+
+    // Generate JWT token
+    const token = generateToken({ id: user.id  });
+
+    const otp = generateOTP();
+    const expiresAt = getExpiryTime();
 
     if (user) {
       const isVerified = signupMethod === 'email' ? user.emailVerified : user.phoneVerified;
       if (isVerified) {
         return {
-          success: false,
-          message: `This ${signupMethod} is already registered and verified.`,
-          errors: [`${signupMethod} already exists`],
+          success: true,
+          message: 'User already verified',
+          data: {
+            userId: user.id,
+            isVerified,
+            email: user.email,
+            phone: user.phone,
+            status: user.status,
+            role: user.role,
+            token,
+          },
         };
       }
     }
@@ -68,15 +83,9 @@ exports.signup = async ({ identifier, signupMethod }) => {
       user = await User.create({
         [signupMethod]: identifier,
         authProvider: signupMethod,
-        role: 'customer',
+        role: role,
       });
     }
-
-    // Generate JWT token
-    const token = generateToken({ id: user.id  });
-
-    const otp = generateOTP();
-    const expiresAt = getExpiryTime();
 
     await Verification.upsert({
       userId: user.id,
@@ -96,9 +105,18 @@ exports.signup = async ({ identifier, signupMethod }) => {
     return {
       success: true,
       message: 'Sign-up successful. OTP sent.',
-      data: { userId: user.id, otp, token },
+      data: { 
+        userId: user.id,
+        isVerified: false,
+        email: user.email,
+        phone: user.phone,
+        status: user.status,
+        role: user.role,
+        token,
+      },
     };
   } catch (error) {
+    logError(error);
     return { success: false, message: 'Sign-up failed.', errors: [error.message] };
   }
 };
@@ -107,20 +125,31 @@ exports.signupResend = async (currentUser) => {
   try {
     const { id: userId, email, authProvider, emailVerified, phoneVerified } = currentUser;
 
+    // Update OTP and expiry time
+    const code = generateOTP();
+    const newExpiryTime = getExpiryTime();
+
     // Check verification status based on type
     const isVerified = authProvider === 'email' ? emailVerified : phoneVerified;
     if (isVerified) {
-      return { success: false, message: `User already verified with ${authProvider}`, errors: [], code: 409 };
+      return { 
+        success: true,
+        message: 'User already verified',
+        data: {
+          userId,
+          isVerified,
+          email,
+          phone: currentUser.phone,
+          status: currentUser.status,
+          role: currentUser.role,
+        },
+       };
     }
 
     // Find existing OTP
     const verification = await Verification.findOne({ where: { userId, type: authProvider } });
 
     if (verification) {
-
-      // Update OTP and expiry time
-      const code = generateOTP();
-      const newExpiryTime = getExpiryTime();
 
       verification.code = code;
       verification.expiresAt = newExpiryTime;
@@ -136,10 +165,6 @@ exports.signupResend = async (currentUser) => {
       return { success: true, message: 'OTP resent successfully', data: { code } };
     }
 
-    // If no existing OTP, create a new one
-    const code = generateOTP();
-    const expiresAt = getExpiryTime();
-
     await Verification.create({ userId, code, type, expiresAt });
 
     // Send OTP to the user email or phone
@@ -149,7 +174,7 @@ exports.signupResend = async (currentUser) => {
       // Implement SMS sending logic here
     }
 
-    return { success: true, message: 'OTP generated and sent successfully', data: { code } };
+    return { success: true, message: 'Code generated and sent successfully', data: { code } };
   } catch (error) {
     console.error('Error in signupResend service:', error);
     return { success: false, message: error.message };
@@ -228,10 +253,14 @@ exports.selectRole = async (userId, role) => {
   }
 };
 
-exports.forgotPassword = async (email) => {
+exports.forgotPassword = async (email, role) => {
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email, role } });
     if (!user) return { success: false, message: 'Email not found', errors: [], code: 404 };
+
+    if (!user.emailVerified) return { success: false, message: 'Email not verified', errors: [], code: 401 };
+
+    // if (user.status !== 'active') return { success: false, message: 'User account is not active', errors: [], code: 401 };
 
     const code = generateOTP();
     const expiresAt = getExpiryTime();
@@ -246,9 +275,9 @@ exports.forgotPassword = async (email) => {
   }
 };
 
-exports.verifyForgotOTP = async (email, code) => {
+exports.verifyForgotOTP = async (email, code, role) => {
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email, role } });
 
     if (!user) return { success: false, message: 'Email not found', errors: [], code: 404 };
 
@@ -265,13 +294,13 @@ exports.verifyForgotOTP = async (email, code) => {
   }
 };
 
-exports.resendForgotOTP = async (email) => {
-  return this.forgotPassword(email);
+exports.resendForgotOTP = async (email, role) => {
+  return this.forgotPassword(email, role);
 };
 
-exports.resetPassword = async (email, code, newPassword) => {
+exports.resetPassword = async (email, code, role, newPassword) => {
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email, role } });
     if (!user) return { success: false, message: 'Email not found', errors: [], code: 404 };
 
     const verification = await Verification.findOne({ where: { userId: user.id, code } });

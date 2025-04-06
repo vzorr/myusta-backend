@@ -1,4 +1,4 @@
-module.exports.ROLES = {
+  module.exports.ROLES = {
     CUSTOMER: 'customer',
     USTA: 'usta',
   }

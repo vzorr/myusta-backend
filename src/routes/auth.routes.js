@@ -3,7 +3,15 @@ const router = express.Router();
 const authController = require('./../controllers/auth.controller');
 const validate = require('../middlewares/validate');
 const authenticate = require('../middlewares/authentication');
-const { loginSchema, signupSchema, roleSelectionSchema, forgotPasswordSchema, verifyOTPSchema, resendOTPSchema, resetPasswordSchema } = require('../validators/auth.validation');
+const {
+  loginSchema,
+  signupSchema,
+  roleSelectionSchema,
+  forgotPasswordSchema,
+  verifyOTPSchema,
+  resendOTPSchema,
+  resetPasswordSchema,
+} = require('../validators/auth.validation');
 
 // Login Route
 router.post('/login', validate(loginSchema), authController.login);
@@ -12,13 +20,13 @@ router.post('/login', validate(loginSchema), authController.login);
 router.post('/signup', validate(signupSchema), authController.signup);
 
 // Signup Verification Route
-router.post('/signup-verify', authenticate, validate(verifyOTPSchema), authController.signupVerify);
+router.post('/signup-verify', authenticate, authController.signupVerify);
 
 // Signup Resend OTP Route
 router.post('/signup-resend', authenticate, authController.signupResend);
 
 // Role Selection Route
-router.post('/select-role',authenticate, validate(roleSelectionSchema), authController.selectRole);
+router.post('/select-role', authenticate, validate(roleSelectionSchema), authController.selectRole);
 
 // Forgot Password (Request OTP)
 router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
@@ -31,7 +39,5 @@ router.post('/resend-otp', validate(resendOTPSchema), authController.resendForgo
 
 // Reset Password
 router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
-
-
 
 module.exports = router;

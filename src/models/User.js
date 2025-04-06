@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { ROLES, STATUS, AUTH_PROVIDERS } = require('../utils/constant');
+const { ROLES, STATUS, AUTH_PROVIDERS, APP_IDS } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const User = sequelize.define('User', {
@@ -18,13 +18,12 @@ module.exports = (sequelize) => {
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
-      allowNull: true,
+      validate: {
+        isEmail: true,
+      },
     },
     phone: {
       type: DataTypes.STRING,
-      unique: true,
-      allowNull: true,
     },
     emailVerified: {
       type: DataTypes.BOOLEAN,
@@ -44,8 +43,7 @@ module.exports = (sequelize) => {
     },
     role: {
       type: DataTypes.ENUM(...Object.values(ROLES)),
-      allowNull: true,
-      defaultValue: null,
+      allowNull: false,
     },
     status: {
       type: DataTypes.ENUM(...Object.values(STATUS)),
@@ -53,14 +51,6 @@ module.exports = (sequelize) => {
     },
   }, {
     indexes: [
-      {
-        unique: true,
-        fields: ['email'],
-      },
-      {
-        unique: true,
-        fields: ['phone'],
-      },
     ],
   });
 
