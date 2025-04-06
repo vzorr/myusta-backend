@@ -195,23 +195,72 @@ exports.verifyOTP = async (userId, otp, type) => {
   }
 };
 
-exports.resendOTP = async (userId, type) => {
-  try {
-    const otp = generateOTP();
-    const expiresAt = getExpiryTime();
-
-    await Verification.upsert({ userId, code: otp, type, expiresAt });
-
-    return { success: true, data: { otp } };
-  } catch (error) {
-    return { success: false, message: error.message };
-  }
-};
 
 exports.selectRole = async (userId, role) => {
   try {
     await User.update({ role }, { where: { id: userId } });
     return { success: true, data: { role } };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+exports.forgotPassword = async (email) => {
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) return { success: false, message: 'Email not found', errors: [], code: 404 };
+
+    const code = generateOTP();
+    const expiresAt = getExpiryTime();
+
+    await Verification.upsert({ userId: user.id, code, type: 'email', expiresAt });
+
+    // await sendEmail(email, 'Password Reset OTP', `Your OTP: ${otp}`);
+
+    return { success: true, message: 'Code sent to your email', data: { code }, code: 200 };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+exports.verifyForgotOTP = async (email, code) => {
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) return { success: false, message: 'Email not found', errors: [], code: 404 };
+
+    const verification = await Verification.findOne({ where: { userId: user.id, code } });
+
+    if (!verification || new Date() > verification.expiresAt) {
+      return { success: false, message: 'Invalid or expired OTP' };
+    }
+
+    return { success: true, message: 'OTP verified successfully' };
+  } catch (error) {
+    logError(error);
+    return { success: false, message: error.message };
+  }
+};
+
+exports.resendForgotOTP = async (email) => {
+  return this.forgotPassword(email);
+};
+
+exports.resetPassword = async (email, code, newPassword) => {
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) return { success: false, message: 'Email not found', errors: [], code: 404 };
+
+    const verification = await Verification.findOne({ where: { userId: user.id, code } });
+
+    if (!verification || new Date() > verification.expiresAt) {
+      return { success: false, message: 'Invalid or expired OTP' };
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.update({ password: hashedPassword }, { where: { id: user.id } });
+
+    return { success: true, message: 'Password reset successfully' };
   } catch (error) {
     return { success: false, message: error.message };
   }

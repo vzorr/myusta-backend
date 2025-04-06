@@ -48,8 +48,6 @@ exports.signupResend = async (req, res) => {
   }
 };
 
-
-
 exports.signupVerify = async (req, res) => {
   try {
     const { code } = req.body;
@@ -67,19 +65,6 @@ exports.signupVerify = async (req, res) => {
   }
 };
 
-exports.resendOTP = async (req, res) => {
-  try {
-    const { userId, type } = req.body;
-    const result = await authService.resendOTP(userId, type);
-    if (!result.success) {
-      return errorResponse(res, result.message, result.errors, 400);
-    }
-    return successResponse(res, 'OTP resent successfully', result.data);
-  } catch (error) {
-    return errorResponse(res, 'Error during OTP resending', [error.message], 500);
-  }
-};
-
 exports.selectRole = async (req, res) => {
   try {
     const { role } = req.body;
@@ -91,5 +76,73 @@ exports.selectRole = async (req, res) => {
     return successResponse(res, 'Role selected successfully', result.data);
   } catch (error) {
     return errorResponse(res, 'Error during role selection', [error.message], 500);
+  }
+};
+
+// Forgot Password - Request OTP
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.forgotPassword(email);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, result.code || 400);
+    }
+
+    return successResponse(res, result.message, result.data, result.code || 200);
+  } catch (error) {
+    console.error('Error in forgotPassword:', error);
+    return errorResponse(res, 'Error during password reset', [error.message], 500);
+  }
+};
+
+// Verify OTP
+exports.verifyForgotOTP = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const result = await authService.verifyForgotOTP(email, code);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 400);
+    }
+
+    return successResponse(res, result.message);
+  } catch (error) {
+    console.error('Error in verifyForgotOTP:', error);
+    return errorResponse(res, 'Error verifying OTP', [error.message], 500);
+  }
+};
+
+// Resend OTP
+exports.resendForgotOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.resendForgotOTP(email);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, result.code || 400);
+    }
+
+    return successResponse(res, result.message, result.data, result.code || 200);
+  } catch (error) {
+    console.error('Error in resendForgotOTP:', error);
+    return errorResponse(res, 'Error resending OTP', [error.message], 500);
+  }
+};
+
+// Reset Password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, code ,newPassword } = req.body;
+    const result = await authService.resetPassword(email, code, newPassword);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 400);
+    }
+
+    return successResponse(res, result.message);
+  } catch (error) {
+    console.error('Error in resetPassword:', error);
+    return errorResponse(res, 'Error resetting password', [error.message], 500);
   }
 };

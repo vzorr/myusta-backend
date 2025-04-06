@@ -1,17 +1,15 @@
 const Joi = require("joi");
 
-
 const loginSchema = Joi.object({
   email: Joi.string().email().required().messages({
-    'string.email': 'Invalid email format.',
-    'any.required': 'Email is required.',
+    "string.email": "Invalid email format.",
+    "any.required": "Email is required.",
   }),
   password: Joi.string().min(6).required().messages({
-    'string.min': 'Password must be at least 6 characters long.',
-    'any.required': 'Password is required.',
+    "string.min": "Password must be at least 6 characters long.",
+    "any.required": "Password is required.",
   }),
 });
-
 
 // Custom validation for phone numbers (basic international format)
 // const phoneRegex = /^[0-9]{10,15}$/;
@@ -23,9 +21,11 @@ const signupSchema = Joi.object({
     "any.required": "signupMethod is required.",
   }),
 
-  identifier: Joi.string().required().messages({
-    "any.required": "identifier is required.",
-  })
+  identifier: Joi.string()
+    .required()
+    .messages({
+      "any.required": "identifier is required.",
+    })
     .when("signupMethod", {
       switch: [
         {
@@ -43,15 +43,38 @@ const signupSchema = Joi.object({
             }),
         },
       ],
-    })
-});
-
-const verifyOTPSchema = Joi.object({
-  code: Joi.string().length(4).required(),
+    }),
 });
 
 const roleSelectionSchema = Joi.object({
   role: Joi.string().valid("usta", "customer").required(),
 });
 
-module.exports = { signupSchema, verifyOTPSchema, roleSelectionSchema, loginSchema };
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const verifyOTPSchema = Joi.object({
+  email: Joi.string().email().required(),
+  code: Joi.string().length(4).required(),
+});
+
+const resendOTPSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const resetPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+  code: Joi.string().length(4).required(),
+  newPassword: Joi.string().min(6).required(),
+});
+
+module.exports = {
+  signupSchema,
+  verifyOTPSchema,
+  roleSelectionSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resendOTPSchema,
+  resetPasswordSchema,
+};
