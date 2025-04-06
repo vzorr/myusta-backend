@@ -1,7 +1,51 @@
+const bcrypt = require('bcrypt');
 const { User, Verification } = require('../models');
 const { generateOTP, getExpiryTime } = require('../utils/common');
 const { generateToken } = require('../helpers/jwt');
 const { logError, logger } = require('../utils/logger');
+
+
+
+exports.login = async (email, password) => {
+  try {
+    // Find the user by email
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return { success: false, message: 'Invalid email or password', errors: ['User not found'] };
+    }
+
+    // Check if user is active
+    if (user.status !== 'active') {
+      return { success: false, message: 'User account is not active', errors: ['Account inactive'] };
+    }
+
+    // Verify the password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return { success: false, message: 'Invalid email or password', errors: ['Incorrect password'] };
+    }
+
+    // Generate JWT token
+    const token = generateToken({ id: user.id, role: user.role });
+
+    return {
+      success: true,
+      message: 'Login successful',
+      data: {
+        userId: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        token,
+      },
+    };
+  } catch (error) {
+    console.error('Error in login service:', error);
+    return { success: false, message: error.message };
+  }
+};
 
 
 exports.signup = async ({ identifier, signupMethod }) => {

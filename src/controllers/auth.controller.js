@@ -1,6 +1,23 @@
 const authService = require('../services/auth.service');
 const { successResponse, errorResponse } = require('../utils/response');
 
+// User Login
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const result = await authService.login(email, password);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 401);
+    }
+
+    return successResponse(res, result.message, result.data);
+  } catch (error) {
+    console.error('Error in login:', error);
+    return errorResponse(res, 'Error during login', [error.message], 500);
+  }
+};
+
 exports.signup = async (req, res) => {
   try {
     const result = await authService.signup(req.body);

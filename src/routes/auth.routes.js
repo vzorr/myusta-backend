@@ -3,7 +3,10 @@ const router = express.Router();
 const authController = require('./../controllers/auth.controller');
 const validate = require('../middlewares/validate');
 const authenticate = require('../middlewares/authentication');
-const { signupSchema, verifyOTPSchema, roleSelectionSchema } = require('../validators/auth.validation');
+const { loginSchema, signupSchema, verifyOTPSchema, roleSelectionSchema } = require('../validators/auth.validation');
+
+// Login Route
+router.post('/login', validate(loginSchema), authController.login);
 
 // Sign-Up Route
 router.post('/signup', validate(signupSchema), authController.signup);
@@ -16,5 +19,7 @@ router.post('/signup-resend', authenticate, authController.signupResend);
 
 // Role Selection Route
 router.post('/select-role',authenticate, validate(roleSelectionSchema), authController.selectRole);
+
+
 
 module.exports = router;
