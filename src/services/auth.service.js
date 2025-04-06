@@ -11,10 +11,10 @@ const { STATUS } = require('../utils/constant');
 
 const googleClient = new OAuth2Client( GOOGLE.CLIENT_ID );
 
-exports.login = async (email, password) => {
+exports.login = async (email, password, role) => {
   try {
     // Find the user by email
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email, role } });
 
     if (!user) {
       return { success: false, message: 'Invalid email or password', errors: ['User not found'] };
