@@ -260,6 +260,8 @@ exports.resetPassword = async (email, code, newPassword) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await User.update({ password: hashedPassword }, { where: { id: user.id } });
 
+    await verification.destroy();
+
     return { success: true, message: 'Password reset successfully' };
   } catch (error) {
     return { success: false, message: error.message };
