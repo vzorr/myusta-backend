@@ -20,7 +20,18 @@ exports.login = async (req, res) => {
 
 exports.signup = async (req, res) => {
   try {
-    const result = await authService.signup(req.body);
+
+    const { signupMethod, ...others } = req.body;
+
+    if (signupMethod === 'google') {
+      const result = await authService.googleSignup({ signupMethod, ...others });
+      if (!result.success) {
+        return errorResponse(res, result.message, result.errors, 400);
+      }
+      return successResponse(res, result.message, result.data, 201);
+    }
+
+    const result = await authService.signup({ signupMethod, ...others });
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
     }

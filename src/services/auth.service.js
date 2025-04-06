@@ -4,9 +4,12 @@ const { generateOTP, getExpiryTime } = require('../utils/common');
 const { generateToken } = require('../helpers/jwt');
 const { sendOtpEmail } = require('../helpers/email.helpers')
 const { logError, logger } = require('../utils/logger');
-const { log } = require('winston');
+const { OAuth2Client } = require('google-auth-library');
 
+const { GOOGLE } = require('./../config/index');
+const { STATUS } = require('../utils/constant');
 
+const googleClient = new OAuth2Client( GOOGLE.CLIENT_ID );
 
 exports.login = async (email, password) => {
   try {
@@ -120,6 +123,66 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
     return { success: false, message: 'Sign-up failed.', errors: [error.message] };
   }
 };
+exports.googleSignup = async ({ identifier, signupMethod, role }) => {
+  try {
+    // Check if Google client is initialized
+    if (!googleClient) {
+      throw new Error('Google client is not initialized');
+    }
+
+    // Verify the Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: identifier,
+      audience: GOOGLE.CLIENT_ID,
+    });
+
+    // Extract payload from the verified ticket
+    const payload = ticket.getPayload();
+    if (!payload) {
+      throw new Error('Invalid Google token payload');
+    }
+
+    const { email, sub: googleId } = payload;
+
+    if (!email) {
+      throw new Error('Google account does not have an email');
+    }
+
+    // Check if the user already exists
+    let user = await User.findOne({ where: { email, role } });
+    if (!user) {
+      user = await User.create({
+        email,
+        googleId,
+        authProvider: signupMethod,
+        role: role,
+        emailVerified: true,
+        status: STATUS.INPROGRESS,
+      });
+    }
+
+    // Generate JWT token including user ID and role
+    const token = generateToken({ id: user.id, role: user.role });
+
+    return {
+      success: true,
+      message: 'Sign-up successful.',
+      data: {
+        userId: user.id,
+        isVerified: true,
+        email: user.email,
+        phone: user.phone,
+        status: user.status,
+        role: user.role,
+        token,
+      },
+    };
+  } catch (error) {
+    logError(`Error in googleSignup: ${error.message}`);
+    return { success: false, message: 'Google sign-up failed.', errors: [error.message] };
+  }
+};
+
 
 exports.signupResend = async (currentUser) => {
   try {
@@ -318,4 +381,4 @@ exports.resetPassword = async (email, code, role, newPassword) => {
   } catch (error) {
     return { success: false, message: error.message };
   }
-};
+}

@@ -22,7 +22,7 @@ const loginSchema = Joi.object({
 
 // Signup Validation
 const signupSchema = Joi.object({
-  signupMethod: Joi.string().required().valid("email", "phone").messages({
+  signupMethod: Joi.string().required().valid("email", "phone", "google", "facebook").messages({
     "any.only": "signupMethod must be either email or phone.",
     "any.required": "signupMethod is required.",
   }),
@@ -47,6 +47,18 @@ const signupSchema = Joi.object({
               "string.pattern.base": "Identifier must be a valid phone number.",
             }),
         },
+        {
+          is: "google",
+          then: Joi.string().messages({
+            "string.base": "Identifier must be a valid Google ID.",
+          }),
+        },
+        {
+          is: "facebook",
+          then: Joi.string().messages({
+            "string.base": "Identifier must be a valid Facebook ID.",
+          }),
+        }
       ],
     }),
   role: Joi.string()

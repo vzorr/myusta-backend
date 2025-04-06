@@ -41,6 +41,14 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM(...Object.values(AUTH_PROVIDERS)),
       allowNull: false,
     },
+    googleId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    facebookId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     role: {
       type: DataTypes.ENUM(...Object.values(ROLES)),
       allowNull: false,
