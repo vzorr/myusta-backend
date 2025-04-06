@@ -4,8 +4,8 @@ const { successResponse, errorResponse } = require('../utils/response');
 // User Login
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const result = await authService.login(email, password);
+    const { email, password, role } = req.body;
+    const result = await authService.login(email, password, role);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 401);
@@ -20,7 +20,18 @@ exports.login = async (req, res) => {
 
 exports.signup = async (req, res) => {
   try {
-    const result = await authService.signup(req.body);
+
+    const { signupMethod, ...others } = req.body;
+
+    if (signupMethod === 'google') {
+      const result = await authService.googleSignup({ signupMethod, ...others });
+      if (!result.success) {
+        return errorResponse(res, result.message, result.errors, 400);
+      }
+      return successResponse(res, result.message, result.data, 201);
+    }
+
+    const result = await authService.signup({ signupMethod, ...others });
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
     }
@@ -82,8 +93,8 @@ exports.selectRole = async (req, res) => {
 // Forgot Password - Request OTP
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
-    const result = await authService.forgotPassword(email);
+    const { email, role } = req.body;
+    const result = await authService.forgotPassword(email, role);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, result.code || 400);
@@ -99,8 +110,8 @@ exports.forgotPassword = async (req, res) => {
 // Verify OTP
 exports.verifyForgotOTP = async (req, res) => {
   try {
-    const { email, code } = req.body;
-    const result = await authService.verifyForgotOTP(email, code);
+    const { email, code, role } = req.body;
+    const result = await authService.verifyForgotOTP(email, code, role);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
@@ -116,8 +127,8 @@ exports.verifyForgotOTP = async (req, res) => {
 // Resend OTP
 exports.resendForgotOTP = async (req, res) => {
   try {
-    const { email } = req.body;
-    const result = await authService.resendForgotOTP(email);
+    const { email, role } = req.body;
+    const result = await authService.resendForgotOTP(email, role);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, result.code || 400);
@@ -133,8 +144,8 @@ exports.resendForgotOTP = async (req, res) => {
 // Reset Password
 exports.resetPassword = async (req, res) => {
   try {
-    const { email, code ,newPassword } = req.body;
-    const result = await authService.resetPassword(email, code, newPassword);
+    const { email, code, role, newPassword } = req.body;
+    const result = await authService.resetPassword(email, code, role, newPassword);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
