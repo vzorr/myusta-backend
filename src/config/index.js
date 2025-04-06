@@ -18,5 +18,12 @@ module.exports = {
   JWT: {
     SECRET_KEY: process.env.JWT_SECRET_KEY,
     EXPIRES_IN: process.env.JWT_EXPIRATION_TIME,
-  }
+  },
+  EMAIL: {
+    SERVICE: process.env.MAIL_SERVICE,
+    USER: process.env.MAIL_USER,
+    PASSWORD: process.env.MAIL_PASSWORD,
+    HOST: process.env.MAIL_HOST,
+    PORT: process.env.MAIL_PORT,
+  },
 }

@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const { User, Verification } = require('../models');
 const { generateOTP, getExpiryTime } = require('../utils/common');
 const { generateToken } = require('../helpers/jwt');
+const { sendOtpEmail } = require('../helpers/email.helpers')
 const { logError, logger } = require('../utils/logger');
 
 
@@ -84,6 +85,14 @@ exports.signup = async ({ identifier, signupMethod }) => {
       expiresAt,
     });
 
+    // Send OTP to the user email or phone
+    if (signupMethod === 'email') {
+      await sendOtpEmail(identifier, otp);
+    } else if (signupMethod === 'phone') {
+      // Implement SMS sending logic here
+    }
+    
+
     return {
       success: true,
       message: 'Sign-up successful. OTP sent.',
@@ -96,7 +105,7 @@ exports.signup = async ({ identifier, signupMethod }) => {
 
 exports.signupResend = async (currentUser) => {
   try {
-    const { id: userId, authProvider, emailVerified, phoneVerified } = currentUser;
+    const { id: userId, email, authProvider, emailVerified, phoneVerified } = currentUser;
 
     // Check verification status based on type
     const isVerified = authProvider === 'email' ? emailVerified : phoneVerified;
@@ -110,23 +119,37 @@ exports.signupResend = async (currentUser) => {
     if (verification) {
 
       // Update OTP and expiry time
-      const newOtp = generateOTP();
+      const code = generateOTP();
       const newExpiryTime = getExpiryTime();
 
-      verification.code = newOtp;
+      verification.code = code;
       verification.expiresAt = newExpiryTime;
       await verification.save();
 
-      return { success: true, message: 'OTP resent successfully', data: { otp: newOtp } };
+      // Send OTP to the user email or phone
+      if (authProvider === 'email') {
+        sendOtpEmail(email, code);
+      } else if (authProvider === 'phone') {
+        // Implement SMS sending logic here
+      }
+
+      return { success: true, message: 'OTP resent successfully', data: { code } };
     }
 
     // If no existing OTP, create a new one
-    const otp = generateOTP();
+    const code = generateOTP();
     const expiresAt = getExpiryTime();
 
-    await Verification.create({ userId, code: otp, type, expiresAt });
+    await Verification.create({ userId, code, type, expiresAt });
 
-    return { success: true, message: 'OTP generated and sent successfully', data: { otp } };
+    // Send OTP to the user email or phone
+    if (authProvider === 'email') {
+      await sendOtpEmail(email, otp);
+    } else if (authProvider === 'phone') {
+      // Implement SMS sending logic here
+    }
+
+    return { success: true, message: 'OTP generated and sent successfully', data: { code } };
   } catch (error) {
     console.error('Error in signupResend service:', error);
     return { success: false, message: error.message };
@@ -215,7 +238,7 @@ exports.forgotPassword = async (email) => {
 
     await Verification.upsert({ userId: user.id, code, type: 'email', expiresAt });
 
-    // await sendEmail(email, 'Password Reset OTP', `Your OTP: ${otp}`);
+    sendOtpEmail(email, code);
 
     return { success: true, message: 'Code sent to your email', data: { code }, code: 200 };
   } catch (error) {
