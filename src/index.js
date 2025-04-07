@@ -27,6 +27,9 @@ app.use(morgan((tokens, req, res) => {
 app.use(cors());
 app.use(express.json());
 
+// Health Check Route
+app.get('/', (req, res) => res.send('OK - Server is running!'));
+
 // Routes
 app.use('/api', routes);
 
