@@ -39,7 +39,7 @@
   },    
 
   "availability": {
-    "locations":{
+    "location":{
       "latitude": 42.0693,
       "longitude": 19.5033,
       "address": "Shkodër, Albania"
