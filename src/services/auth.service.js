@@ -57,14 +57,13 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
   try {
     let user = await User.findOne({ where: { [signupMethod]: identifier, role } });
 
-    // Generate JWT token
-    const token = generateToken({ id: user.id  });
-
     const otp = generateOTP();
     const expiresAt = getExpiryTime();
 
     if (user) {
       const isVerified = signupMethod === 'email' ? user.emailVerified : user.phoneVerified;
+      const token = generateToken({ id: user.id });
+
       if (isVerified) {
         return {
           success: true,
@@ -90,6 +89,9 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
       });
     }
 
+    // Token generate karo yahan, jab sure ho ke user exist karta hai
+    const token = generateToken({ id: user.id });
+
     await Verification.upsert({
       userId: user.id,
       code: otp,
@@ -103,12 +105,11 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
     } else if (signupMethod === 'phone') {
       // Implement SMS sending logic here
     }
-    
 
     return {
       success: true,
       message: 'Sign-up successful. OTP sent.',
-      data: { 
+      data: {
         userId: user.id,
         isVerified: false,
         email: user.email,
@@ -123,6 +124,7 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
     return { success: false, message: 'Sign-up failed.', errors: [error.message] };
   }
 };
+
 exports.googleSignup = async ({ identifier, signupMethod, role }) => {
   try {
     // Check if Google client is initialized
