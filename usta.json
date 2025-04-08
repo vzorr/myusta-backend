@@ -1,0 +1,62 @@
+{
+  "basicInfo": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "phoneNumber": "1234567890",
+    "password": "password123",
+    "profilePicture": "https://example.com/profile.jpg"
+  },
+
+  "professionalDetail": {
+    "nipt": "1234567890",
+    "experiences": [
+      {
+        "category": "Plumber",
+        "yearsOfExp": 5
+      },
+      {
+        "category": "Electrician",
+        "yearsOfExp": 3
+      }
+    ],
+    "portfolio": [
+      {
+        "title": "Pipe Fixing Project",
+        "description": "Fixed leaking pipes in a residential building.",
+        "category": "Plumber",
+        "media": [
+          {
+            "type": "image",
+            "url": "https://example.com/image1.jpg"
+          },
+          {
+            "type": "video",
+            "url": "https://example.com/video1.mp4"
+          }
+        ]
+      }
+    ]
+  },    
+
+  "availability": {
+    "locations":{
+      "latitude": 42.0693,
+      "longitude": 19.5033,
+      "address": "Shkodër, Albania"
+    },
+    "maxDistance": 50,
+    "budgetAmount": {
+      "min": 50,
+      "max": 300
+    },
+    "preferredJobTypes": [
+      "Full-time",
+      "Part-time"
+    ]
+  },
+
+  "notificationViaEmail": true,
+  "notificationViaSMS": false,
+  "notificationViaApp": true,
+  "termsAndConditions": true
+}
