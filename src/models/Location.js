@@ -11,7 +11,7 @@ module.exports = (sequelize) => {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'User',
+        model: 'users',
         key: 'id',
       },
     },
@@ -27,9 +27,6 @@ module.exports = (sequelize) => {
       type: DataTypes.DECIMAL(10, 7),
       allowNull: false,
     }
-  }, {
-    tableName: 'user_locations',
-    timestamps: true,
   });
 
   return Location;

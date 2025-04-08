@@ -11,7 +11,7 @@ module.exports = (sequelize) => {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'User',
+        model: 'users',
         key: 'id',
       },
     },
@@ -32,7 +32,10 @@ module.exports = (sequelize) => {
       type: DataTypes.JSONB,
       allowNull: true,
     }
-  });
+  },{
+
+  }
+);
 
   return Availability;
 };

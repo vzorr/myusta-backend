@@ -13,7 +13,7 @@ const sequelize = new Sequelize(
     logging: false, // Disable SQL logging
     define: {
       underscored: true, // Convert camelCase to snake_case
-      freezeTableName: true, // Prevent table name pluralization
+      freezeTableName: false, // Prevent table name pluralization
       timestamps: true, // Automatically manage createdAt and updatedAt
     },
   }

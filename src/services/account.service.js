@@ -1,4 +1,4 @@
-const { User, ProfessionalDetail, Portfolio, Location } = require('../models');
+const { User, ProfessionalDetail, Location, Availability } = require('../models');
 const bcrypt = require("bcrypt");
 const { logError } = require('../utils/logger');
 const { uploadImage } = require("../utils/imageUtils");
@@ -50,6 +50,7 @@ exports.customerAccountCreation = async (userId, data) => {
       notificationViaEmail,
       notificationViaSMS,
       notificationViaApp,
+      status: "active",
     });
 
     // Remove existing locations for the user
@@ -137,24 +138,47 @@ exports.ustaAccountCreation = async (userId, data) => {
       notificationViaEmail,
       notificationViaSMS,
       notificationViaApp,
+      status: 'active',
     });
 
-    // Update Professional Details
-    await ProfessionalDetail.upsert({
-      userId,
-      nipt: professionalDetail.nipt,
-      experiences: professionalDetail.experiences,
-      portfolio: professionalDetail.portfolio,
-    });
+    // Check if professional detail already exists
+    let professional = await ProfessionalDetail.findOne({ where: { userId } });
 
-    // Update Location and Availability
-    await Location.destroy({ where: { userId } });
-    await Location.create({
-      userId,
-      latitude: availability.locations.latitude,
-      longitude: availability.locations.longitude,
-      address: availability.locations.address,
-    });
+    if (professional) {
+      await professional.update({
+        nipt: professionalDetail.nipt,
+        experiences: professionalDetail.experiences,
+        portfolio: professionalDetail.portfolio,
+      });
+    } else {
+      await ProfessionalDetail.create({
+        userId,
+        nipt: professionalDetail.nipt,
+        experiences: professionalDetail.experiences,
+        portfolio: professionalDetail.portfolio,
+      });
+    }
+
+    // Update or create Availability
+    let existingAvailability = await Availability.findOne({ where: { userId } });
+
+    if (existingAvailability) {
+      await existingAvailability.update({
+        location: availability.location,
+        maxDistance: availability.maxDistance,
+        budgetAmount: availability.budgetAmount,
+        preferredJobTypes: availability.preferredJobTypes,
+      });
+    } else {
+      await Availability.create({
+        userId,
+        location: availability.location,
+        maxDistance: availability.maxDistance,
+        budgetAmount: availability.budgetAmount,
+        preferredJobTypes: availability.preferredJobTypes,
+      });
+    }
+
 
     // Prepare the response
     const responseData = {

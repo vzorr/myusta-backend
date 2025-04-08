@@ -66,7 +66,7 @@ const ustaAccountSchema = Joi.object({
   }).required(),
 
   availability: Joi.object({
-    locations: Joi.object({
+    location: Joi.object({
       latitude: Joi.number().required(),
       longitude: Joi.number().required(),
       address: Joi.string().required(),

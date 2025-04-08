@@ -10,6 +10,10 @@ module.exports = (sequelize) => {
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
     code: {
       type: DataTypes.STRING,
