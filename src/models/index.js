@@ -23,6 +23,8 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
+db.User.hasMany(db.Job, { foreignKey: 'userId', as: 'jobs' });
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

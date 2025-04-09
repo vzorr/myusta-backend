@@ -7,6 +7,7 @@ const accountRoutes = require('./account.routes');
 router.use('/auth', authRoutes)
 router.use('/users', userRoutes);
 router.use('/account', accountRoutes);
+router.use('/jobs', jobRoutes);
 
 
 module.exports = router;
