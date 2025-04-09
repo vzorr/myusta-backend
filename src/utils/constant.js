@@ -30,7 +30,7 @@
     APPLIANCE_REPAIR: 'appliance_repair'
   }
 
-  module.PREFERRED_JOB_TYPES = {
+  module.exports.PREFERRED_JOB_TYPES = {
     SHORT_TERM: 'short_term',
     LONG_TERM: 'long_term',
     EMERGENCY: 'emergency',
