@@ -26,7 +26,7 @@ const customerAccountSchema = Joi.object({
 
   customerPreferences: Joi.array().items(Joi.string()).optional(),
   notificationViaEmail: Joi.boolean().optional(),
-  notificationViaSMS: Joi.boolean().optional(),
+  notificationViaSms: Joi.boolean().optional(),
   notificationViaApp: Joi.boolean().optional(),
   termsAndConditions: Joi.boolean().required().messages({
     'any.required': 'Terms and conditions must be accepted.',
@@ -80,7 +80,7 @@ const ustaAccountSchema = Joi.object({
   }).required(),
 
   notificationViaEmail: Joi.boolean().optional(),
-  notificationViaSMS: Joi.boolean().optional(),
+  notificationViaSms: Joi.boolean().optional(),
   notificationViaApp: Joi.boolean().optional(),
   termsAndConditions: Joi.boolean().required(),
 });
