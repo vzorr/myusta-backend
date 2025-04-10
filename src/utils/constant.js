@@ -16,3 +16,22 @@
     GOOGLE: 'google',
     FACEBOOK: 'facebook',
   }
+
+  module.exports.PREFRENCES = {
+    PLUMBER: 'plumber',
+    ELECTRICIAN: 'electrician',
+    CARPENTER: 'carpenter',
+    CLEANER: 'cleaner',
+    LOCKSMITH: 'locksmith',
+    MOVING: 'moving',
+    PAINTER: 'painter',
+    PEST_CONTROL: 'pest_control',
+    HVAC: 'hvac',
+    APPLIANCE_REPAIR: 'appliance_repair'
+  }
+
+  module.exports.PREFERRED_JOB_TYPES = {
+    SHORT_TERM: 'short_term',
+    LONG_TERM: 'long_term',
+    EMERGENCY: 'emergency',
+  }

@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { ROLES, STATUS, AUTH_PROVIDERS, APP_IDS } = require('../utils/constant');
+const { preferences } = require('joi');
 
 module.exports = (sequelize) => {
   const User = sequelize.define('User', {
@@ -56,6 +57,30 @@ module.exports = (sequelize) => {
     status: {
       type: DataTypes.ENUM(...Object.values(STATUS)),
       defaultValue: STATUS.INACTIVE,
+    },
+    customerPreferences: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    profilePicture: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    notificationViaApp: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    notificationViaEmail: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    notificationViaSMS: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    termAndCondition: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   }, {
     indexes: [

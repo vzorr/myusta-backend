@@ -2,7 +2,8 @@ const bcrypt = require('bcrypt');
 const { User, Verification } = require('../models');
 const { generateOTP, getExpiryTime } = require('../utils/common');
 const { generateToken } = require('../helpers/jwt');
-const { sendOtpEmail } = require('../helpers/email.helpers')
+const { sendOtpEmail } = require('../helpers/email.helpers');
+const { sendOtpviaSms } = require('../helpers/vonage');
 const { logError, logger } = require('../utils/logger');
 const { OAuth2Client } = require('google-auth-library');
 
@@ -103,7 +104,8 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
     if (signupMethod === 'email') {
       await sendOtpEmail(identifier, otp);
     } else if (signupMethod === 'phone') {
-      // Implement SMS sending logic here
+      await sendOtpviaSms(identifier, otp);
+
     }
 
     return {

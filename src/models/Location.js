@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  const Verification = sequelize.define('Verification', {
+  const Location = sequelize.define('Location', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -15,26 +15,19 @@ module.exports = (sequelize) => {
         key: 'id',
       },
     },
-    code: {
-      type: DataTypes.STRING,
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    latitude: {
+      type: DataTypes.DECIMAL(10, 7),
       allowNull: false,
     },
-    type: {
-      type: DataTypes.ENUM('email', 'phone'),
+    longitude: {
+      type: DataTypes.DECIMAL(10, 7),
       allowNull: false,
-    },
-    expiresAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-  }, {
-    indexes: [
-      {
-        unique: true,
-        fields: ['user_id', 'type'],
-      },
-    ]
+    }
   });
 
-  return Verification;
+  return Location;
 };

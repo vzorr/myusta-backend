@@ -2,12 +2,14 @@ const accountService = require('../services/account.service');
 const { successResponse, errorResponse } = require('../utils/response');
 
 // Account Creation or Update
-exports.accountCreation = async (req, res) => {
+exports.customerAccount = async (req, res) => {
   try {
-    const { firstName, lastName, phoneNumber, password, imageUrl } = req.body;
+    const body = req.body;
     const userId = req.user.id;
 
-    const result = await accountService.accountCreation(userId, { firstName, lastName, phoneNumber, password, imageUrl });
+    const result = await accountService.customerAccountCreation(userId, {
+      ...body
+    });
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
@@ -15,7 +17,27 @@ exports.accountCreation = async (req, res) => {
 
     return successResponse(res, result.message, result.data);
   } catch (error) {
-    console.error('Error in accountCreation:', error);
+    console.error('Error in customerAccount:', error);
+    return errorResponse(res, 'Error during account creation/update', [error.message], 500);
+  }
+};
+
+exports.ustaAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const body = req.body;
+
+    const result = await accountService.ustaAccountCreation(userId, {
+      ...body
+    });
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 400);
+    }
+
+    return successResponse(res, result.message, result.data);
+  } catch (error) {
+    console.error('Error in ustaAccount:', error);
     return errorResponse(res, 'Error during account creation/update', [error.message], 500);
   }
 };
