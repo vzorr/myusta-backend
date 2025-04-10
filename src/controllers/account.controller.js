@@ -23,9 +23,9 @@ exports.customerAccount = async (req, res) => {
   try {
     const body = req.body;
     const userId = req.user.id;
+    let profilePictureUrl = null;
     
     // // Handle file upload for profile picture
-    // let profilePictureUrl = null;
     // if (req.file) {  // Check if a file was uploaded
     //   const profilePictureKey = `${req.file.originalname}`;
     //   // Upload buffer to S3 (handle memory storage)
