@@ -19,7 +19,7 @@ const createJobSchema = Joi.object({
     'any.required': 'Description is required',
   }),
 
-  payment_method: Joi.string().valid('cash', 'card').required().messages({
+  paymentMethod: Joi.string().valid('cash', 'card').required().messages({
     'string.base': 'Payment method must be a string',
     'string.empty': 'Payment method is required',
     'any.only': 'Payment method must be either "cash" or "card"',
@@ -33,22 +33,22 @@ const createJobSchema = Joi.object({
     'any.required': 'Category is required',
   }),
 
-  area_size: Joi.number().positive().optional().messages({
+  areaSize: Joi.number().positive().optional().messages({
     'number.base': 'Area size must be a number',
     'number.positive': 'Area size must be a positive number',
   }),
 
-  area_type: Joi.string().optional().messages({
+  areaType: Joi.string().optional().messages({
     'string.base': 'Area type must be a string',
   }),
 
-  start_date: Joi.date().greater('now').required().messages({
+  startDate: Joi.date().greater('now').required().messages({
     'date.base': 'Start date must be a valid date',
     'date.greater': 'Start date must be in the future',
     'any.required': 'Start date is required',
   }),
 
-  end_date: Joi.date().greater(Joi.ref('start_date')).required().messages({
+  endDate: Joi.date().greater(Joi.ref('start_date')).required().messages({
     'date.base': 'End date must be a valid date',
     'date.greater': 'End date must be after start date',
     'any.required': 'End date is required',
@@ -89,7 +89,7 @@ const updateJobSchema = Joi.object({
     'string.max': 'Description cannot exceed 2000 characters',
   }),
 
-  payment_method: Joi.string().valid('fixed', 'hourly').messages({
+  paymentMethod: Joi.string().valid('fixed', 'hourly').messages({
     'string.base': 'Payment method must be a string',
     'any.only': 'Payment method must be either "fixed" or "hourly"',
   }),
@@ -99,21 +99,21 @@ const updateJobSchema = Joi.object({
     'any.only': 'Category must be one of the predefined categories',
   }),
 
-  area_size: Joi.number().positive().messages({
+  areaSize: Joi.number().positive().messages({
     'number.base': 'Area size must be a number',
     'number.positive': 'Area size must be a positive number',
   }),
 
-  area_type: Joi.string().messages({
+  areaType: Joi.string().messages({
     'string.base': 'Area type must be a string',
   }),
 
-  start_date: Joi.date().greater('now').messages({
+  startDate: Joi.date().greater('now').messages({
     'date.base': 'Start date must be a valid date',
     'date.greater': 'Start date must be in the future',
   }),
 
-  end_date: Joi.date().greater(Joi.ref('start_date')).messages({
+  endDate: Joi.date().greater(Joi.ref('start_date')).messages({
     'date.base': 'End date must be a valid date',
     'date.greater': 'End date must be after start date',
   }),

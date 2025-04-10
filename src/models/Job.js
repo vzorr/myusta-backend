@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    payment_method: {
+    paymentMethod: {
       type: DataTypes.ENUM('cash', 'card'),
       allowNull: false,
     },
@@ -20,19 +20,19 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM(...Object.values(PREFRENCES)),
       allowNull: false,
     },
-    area_size: {
+    areaSize: {
       type: DataTypes.FLOAT,
       allowNull: true,
     },
-    area_type: {
+    areaType: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    start_date: {
+    startDate: {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    end_date: {
+    endDate: {
       type: DataTypes.DATE,
       allowNull: false,
     },
