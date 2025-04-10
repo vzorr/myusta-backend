@@ -30,4 +30,24 @@ const uploadMediaToS3 = async (file, key) => {
   }
 };
 
-module.exports = { uploadMediaToS3 };
+const uploadBase64MediaToS3 = async (base64String, key, contentType) => {
+  const base64Data = base64String.replace(/^data:.*;base64,/, '');
+
+  const buffer = Buffer.from(base64Data, 'base64');
+
+  const params = {
+    Bucket: BUCKET,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType, // e.g. image/png, video/mp4
+  };
+
+  try {
+    const s3Upload = await s3.upload(params).promise();
+    return s3Upload.Location;
+  } catch (error) {
+    throw new Error('Error uploading to S3: ' + error.message);
+  }
+};
+
+module.exports = { uploadMediaToS3, uploadBase64MediaToS3 };

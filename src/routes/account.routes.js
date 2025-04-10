@@ -9,13 +9,19 @@ const { ROLES } = require('../utils/constant');
 const { customerAccountSchema,ustaAccountSchema } = require('../validators/account.validation');
 
 
-// Account Creation/Update Route
-// Handle multipart/form-data with any files
+// // Handle multipart/form-data with any files
+// router.post(
+//     '/customer-creation',
+//     authenticate,
+//     authorized(ROLES.CUSTOMER),
+//     upload.single('profilePicture'), // Assuming the field name is 'profilePicture'
+//     validate(customerAccountSchema),
+//     accountController.customerAccount
+// );
 router.post(
     '/customer-creation',
     authenticate,
     authorized(ROLES.CUSTOMER),
-    upload.single('profilePicture'), // Assuming the field name is 'profilePicture'
     validate(customerAccountSchema),
     accountController.customerAccount
 );

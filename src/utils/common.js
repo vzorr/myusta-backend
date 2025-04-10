@@ -17,4 +17,9 @@ function hashPassword(password) {
   return bcrypt.hash(password, 10);
 }
 
-module.exports = { generateOTP, getExpiryTime, comparePassword, hashPassword };
+const base64ToBuffer = (base64String) => {
+  const buffer = Buffer.from(base64String, 'base64');
+  return buffer;
+};
+
+module.exports = { generateOTP, getExpiryTime, comparePassword, hashPassword, base64ToBuffer };

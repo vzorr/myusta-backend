@@ -11,9 +11,9 @@ const customerAccountSchema = Joi.object({
     password: Joi.string().min(6).optional().messages({
       'string.min': 'Password must be at least 6 characters long.',
     }),
-    // profilePicture: Joi.string().uri().optional().messages({
-    //   'string.uri': 'Invalid image URL.',
-    // }),
+    profilePicture: Joi.string().uri().optional().messages({
+      'string.uri': 'Invalid image URL.',
+    }),
   }).required(),
 
   location: Joi.array().items(

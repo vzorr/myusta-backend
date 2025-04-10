@@ -4,7 +4,7 @@
     "lastName": "Doe",
     "phoneNumber": "1234567890",
     "password": "password123",
-    "profilePicture": "https://example.com/profile.jpg"
+    "profilePicture": "base64"
   },
   "location": [
     {
@@ -20,7 +20,7 @@
   ],
   "customerPreferences": ["Electrical", "Plumbing", "Carpentry"],
   "notificationViaEmail": true,
-  "notificationViaSMS": false,
+  "notificationViaSms": false,
   "notificationViaApp": true,
   "termsAndConditions": true
 }

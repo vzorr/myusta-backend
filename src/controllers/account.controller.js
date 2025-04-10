@@ -1,7 +1,22 @@
 const accountService = require('../services/account.service');
-const { uploadMediaToS3 } = require('../helpers/s3');  // Import the upload function
+const { uploadMediaToS3, uploadBase64MediaToS3 } = require('../helpers/s3');  // Import the upload function
 
 const { successResponse, errorResponse } = require('../utils/response');
+
+const mime = require('mime-types');
+
+const getExtensionFromBase64 = (base64String) => {
+  const matches = base64String.match(/^data:(.+);base64,/);
+  if (!matches || matches.length < 2) {
+    throw new Error('Invalid base64 string');
+  }
+  const mimeType = matches[1]; // e.g., image/jpeg
+  const ext = mime.extension(mimeType); // e.g., jpg
+  if (!ext) {
+    throw new Error(`Unsupported MIME type: ${mimeType}`);
+  }
+  return { mimeType, ext };
+};
 
 // Account Creation or Update
 exports.customerAccount = async (req, res) => {
@@ -9,12 +24,20 @@ exports.customerAccount = async (req, res) => {
     const body = req.body;
     const userId = req.user.id;
     
-    // Handle file upload for profile picture
-    let profilePictureUrl = null;
-    if (req.file) {  // Check if a file was uploaded
-      const profilePictureKey = `${req.file.originalname}`;
-      // Upload buffer to S3 (handle memory storage)
-      profilePictureUrl = await uploadMediaToS3(req.file, profilePictureKey); // Passing buffer to S3
+    // // Handle file upload for profile picture
+    // let profilePictureUrl = null;
+    // if (req.file) {  // Check if a file was uploaded
+    //   const profilePictureKey = `${req.file.originalname}`;
+    //   // Upload buffer to S3 (handle memory storage)
+    //   profilePictureUrl = await uploadMediaToS3(req.file, profilePictureKey); // Passing buffer to S3
+    // }
+
+    // ✅ Upload profile picture if base64
+    if (body.basicInfo?.profilePicture?.startsWith('data:')) {
+      const { mimeType, ext } = getExtensionFromBase64(body.basicInfo.profilePicture);
+      const profilePictureKey = `profile/${userId}/${Date.now()}.${ext}`;
+      const profilePictureUrl = await uploadBase64MediaToS3(body.basicInfo.profilePicture, profilePictureKey, mimeType);
+      body.basicInfo.profilePicture = profilePictureUrl;
     }
 
     // Pass the data including the profile picture URL (if uploaded)
@@ -38,14 +61,36 @@ exports.customerAccount = async (req, res) => {
 };
 
 
-
 exports.ustaAccount = async (req, res) => {
   try {
     const userId = req.user.id;
     const body = req.body;
 
+    // ✅ Upload profile picture if base64
+    if (body.basicInfo?.profilePicture?.startsWith('data:')) {
+      const { mimeType, ext } = getExtensionFromBase64(body.basicInfo.profilePicture);
+      const profilePictureKey = `profile/${userId}/${Date.now()}.${ext}`;
+      const profilePictureUrl = await uploadBase64MediaToS3(body.basicInfo.profilePicture, profilePictureKey, mimeType);
+      body.basicInfo.profilePicture = profilePictureUrl;
+    }
+
+    // ✅ Upload portfolio media if base64
+    if (body.professionalDetail?.portfolio) {
+      for (let portfolioItem of body.professionalDetail.portfolio) {
+        for (let media of portfolioItem.media) {
+          if (media.url.startsWith('data:')) {
+            const { mimeType, ext } = getExtensionFromBase64(media.url);
+            const key = `portfolio/${userId}/${Date.now()}-${Math.random().toString(36).substr(2, 5)}.${ext}`;
+            const fileUrl = await uploadBase64MediaToS3(media.url, key, mimeType);
+            media.url = fileUrl;
+          }
+        }
+      }
+    }
+
+    // ✅ Proceed with account creation
     const result = await accountService.ustaAccountCreation(userId, {
-      ...body
+      ...body,
     });
 
     if (!result.success) {
