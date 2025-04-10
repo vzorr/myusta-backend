@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  const Verification = sequelize.define('Verification', {
+  const ProfessionalDetail = sequelize.define('ProfessionalDetail', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -15,26 +15,19 @@ module.exports = (sequelize) => {
         key: 'id',
       },
     },
-    code: {
+    nipt: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
-    type: {
-      type: DataTypes.ENUM('email', 'phone'),
-      allowNull: false,
+    experiences: {
+      type: DataTypes.JSONB,
+      allowNull: true,
     },
-    expiresAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
+    portfolio: {
+      type: DataTypes.JSONB,
+      allowNull: true,
     },
-  }, {
-    indexes: [
-      {
-        unique: true,
-        fields: ['user_id', 'type'],
-      },
-    ]
   });
 
-  return Verification;
+  return ProfessionalDetail;
 };

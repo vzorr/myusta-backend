@@ -31,4 +31,15 @@ module.exports = {
     CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
   },
+  VONAGE: {
+    API_KEY: process.env.VONAGE_API_KEY,
+    API_SECRET: process.env.VONAGE_API_SECRET,
+    FROM: 'Vonage',
+  },
+  AWS: {
+    ACCESS_KEY: process.env.AWS_ACCESS_KEY,
+    SECRET_KEY: process.env.AWS_SECRET_KEY,
+    REGION: process.env.AWS_REGION,
+    BUCKET_NAME: process.env.AWS_BUCKET_NAME,
+  }
 }
