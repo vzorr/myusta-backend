@@ -1,70 +1,53 @@
 const AWS = require('aws-sdk');
-const fs = require('fs');
-const path = require('path');
+const awsConfig = require('../config/index').AWS; // Import AWS configuration from your config file
 
-const { AWS } = require('../config/index');
+const BUCKET = "myusta-images-videos";
 
 // Configure AWS SDK
 AWS.config.update({
-  accessKeyId: AWS.ACCESS_KEY,
-  secretAccessKey: AWS.SECRET_KEY,  
-  region: AWS.REGION
+  accessKeyId: awsConfig.ACCESS_KEY,
+  secretAccessKey: awsConfig.SECRET_KEY,
+  region: awsConfig.REGION,
 });
 
-// Create an S3 instance
 const s3 = new AWS.S3();
 
-// Function to upload image to S3
-const uploadImageToS3 = async (filePath, key) => {
+// Function to upload a file to S3
+const uploadMediaToS3 = async (file, key) => {
+  
+  const params = {
+    Bucket: BUCKET,
+    Key: key, // Unique key for the file
+    Body: file.buffer,
+    ContentType: file.mimetype,
+  };
+
   try {
-    // Read image file
-    const fileContent = fs.readFileSync(filePath);
-
-    // S3 upload parameters
-    const params = {
-      Bucket: AWS.BUCKET_NAME,
-      Key: key,            // Unique key for the image
-      Body: fileContent,   // File content
-      ContentType: 'image/jpeg',  // Content type for images
-      ACL: 'public-read',  // Makes the file publicly readable
-    };
-
-    // Upload image to S3
-    const data = await s3.upload(params).promise();
-    console.log(`Image uploaded successfully. URL: ${data.Location}`);
-    return data.Location; // Return the image URL
+    const s3Upload = await s3.upload(params).promise();
+    return s3Upload.Location; // Return the URL of the uploaded file
   } catch (error) {
-    console.error('Error uploading image to S3:', error.message);
-    throw error;
+    throw new Error('Error uploading to S3: ' + error.message);
   }
 };
 
-// Function to upload video to S3
-const uploadVideoToS3 = async (filePath, bucketName, key) => {
+const uploadBase64MediaToS3 = async (base64String, key, contentType) => {
+  const base64Data = base64String.replace(/^data:.*;base64,/, '');
+
+  const buffer = Buffer.from(base64Data, 'base64');
+
+  const params = {
+    Bucket: BUCKET,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType, // e.g. image/png, video/mp4
+  };
+
   try {
-    // Read video file
-    const fileContent = fs.readFileSync(filePath);
-
-    // S3 upload parameters
-    const params = {
-      Bucket: AWS.BUCKET_NAME,
-      Key: key,            // Unique key for the video
-      Body: fileContent,   // File content
-      ContentType: 'video/mp4',  // Content type for videos (you can change it based on file type)
-      ACL: 'public-read',  // Makes the file publicly readable
-    };
-
-    // Upload video to S3
-    const data = await s3.upload(params).promise();
-    console.log(`Video uploaded successfully. URL: ${data.Location}`);
-    return data.Location; // Return the video URL
+    const s3Upload = await s3.upload(params).promise();
+    return s3Upload.Location;
   } catch (error) {
-    console.error('Error uploading video to S3:', error.message);
-    throw error;
+    throw new Error('Error uploading to S3: ' + error.message);
   }
 };
 
-module.exports = {
-  uploadImageToS3,
-  uploadVideoToS3,
-};
+module.exports = { uploadMediaToS3, uploadBase64MediaToS3 };
