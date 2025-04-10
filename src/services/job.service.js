@@ -1,11 +1,33 @@
 // src/services/job.service.js
 const { Job, User } = require('../models');
 const { logger } = require('../utils/logger');
+const { uploadJobImages } = require('../utils/imageUtils');
 
 const createJob = async (jobData) => {
   try {
     logger.info('Creating a new job in the database');
-    const newJob = await Job.create(jobData);
+    
+    // Handle image uploads if images are provided
+    let imageUrls = [];
+    if (jobData.images && jobData.images.length > 0) {
+      try {
+        imageUrls = await uploadJobImages(jobData.images);
+        logger.info(`Successfully uploaded ${imageUrls.length} images for job`);
+      } catch (error) {
+        logger.error(`Error uploading job images: ${error.message}`);
+        return {
+          success: false,
+          message: 'Failed to upload job images',
+          errors: [error.message]
+        };
+      }
+    }
+
+    // Create job with image URLs
+    const newJob = await Job.create({
+      ...jobData,
+      images: imageUrls
+    });
     
     // Optionally fetch the job with associated user data
     const jobWithUser = await Job.findByPk(newJob.id, {

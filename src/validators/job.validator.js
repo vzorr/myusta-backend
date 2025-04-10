@@ -1,5 +1,6 @@
 // src/validators/job.validator.js
 const Joi = require('joi');
+const { PREFRENCES } = require('../utils/constant');
 
 const createJobSchema = Joi.object({
   title: Joi.string().min(5).max(100).required().messages({
@@ -25,22 +26,20 @@ const createJobSchema = Joi.object({
     'any.required': 'Payment method is required',
   }),
 
-  category: Joi.string().required().messages({
+  category: Joi.string().valid(...Object.values(PREFRENCES)).required().messages({
     'string.base': 'Category must be a string',
     'string.empty': 'Category is required',
+    'any.only': 'Category must be one of the predefined categories',
     'any.required': 'Category is required',
   }),
 
-  area_size: Joi.number().positive().required().messages({
+  area_size: Joi.number().positive().optional().messages({
     'number.base': 'Area size must be a number',
     'number.positive': 'Area size must be a positive number',
-    'any.required': 'Area size is required',
   }),
 
-  area_type: Joi.string().required().messages({
+  area_type: Joi.string().optional().messages({
     'string.base': 'Area type must be a string',
-    'string.empty': 'Area type is required',
-    'any.required': 'Area type is required',
   }),
 
   start_date: Joi.date().greater('now').required().messages({
@@ -65,11 +64,16 @@ const createJobSchema = Joi.object({
     'any.required': 'Location is required',
   }),
 
-  budget: Joi.number().positive().required().messages({
+  budget: Joi.number().positive().optional().messages({
     'number.base': 'Budget must be a number',
     'number.positive': 'Budget must be a positive number',
-    'any.required': 'Budget is required',
   }),
+
+  images: Joi.array().items(Joi.string().base64()).max(10).optional().messages({
+    'array.base': 'Images must be an array',
+    'array.max': 'Maximum 10 images allowed',
+    'string.base64': 'Each image must be a valid base64 string'
+  })
 });
 
 const updateJobSchema = Joi.object({
@@ -90,8 +94,9 @@ const updateJobSchema = Joi.object({
     'any.only': 'Payment method must be either "fixed" or "hourly"',
   }),
 
-  category: Joi.string().messages({
+  category: Joi.string().valid(...Object.values(PREFRENCES)).messages({
     'string.base': 'Category must be a string',
+    'any.only': 'Category must be one of the predefined categories',
   }),
 
   area_size: Joi.number().positive().messages({

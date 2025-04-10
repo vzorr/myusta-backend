@@ -1,5 +1,6 @@
 // src/models/Job.js
 const { DataTypes } = require('sequelize');
+const { PREFRENCES } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const Job = sequelize.define('Job', {
@@ -15,13 +16,17 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM('cash', 'card'),
       allowNull: false,
     },
+    category: {
+      type: DataTypes.ENUM(...Object.values(PREFRENCES)),
+      allowNull: false,
+    },
     area_size: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
     },
     area_type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     start_date: {
       type: DataTypes.DATE,
@@ -41,7 +46,7 @@ module.exports = (sequelize) => {
     },
     budget: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM('pending', 'active', 'completed'),
@@ -55,6 +60,23 @@ module.exports = (sequelize) => {
         key: 'id',
       },
     },
+    images: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: [],
+      validate: {
+        isArray(value) {
+          if (!Array.isArray(value)) {
+            throw new Error('Images must be an array');
+          }
+        },
+        isValidImageArray(value) {
+          if (!value.every(item => typeof item === 'string' && item.startsWith('http'))) {
+            throw new Error('Each image must be a valid URL string');
+          }
+        }
+      }
+    }
   });
 
   Job.associate = (models) => {
