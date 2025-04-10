@@ -10,7 +10,7 @@ exports.customerAccountCreation = async (userId, data) => {
       location,
       customerPreferences,
       notificationViaEmail,
-      notificationViaSMS,
+      notificationViaSms,
       notificationViaApp,
       termsAndConditions,
     } = data;
@@ -48,7 +48,7 @@ exports.customerAccountCreation = async (userId, data) => {
       profilePicture: basicInfo.profilePicture,
       customerPreferences: customerPreferences,
       notificationViaEmail,
-      notificationViaSMS,
+      notificationViaSms,
       notificationViaApp,
       status: "active",
     });
@@ -81,7 +81,7 @@ exports.customerAccountCreation = async (userId, data) => {
       location,
       customerPreferences,
       notificationViaEmail,
-      notificationViaSMS,
+      notificationViaSms,
       notificationViaApp,
     };
 
@@ -107,7 +107,7 @@ exports.ustaAccountCreation = async (userId, data) => {
       professionalDetail,
       availability,
       notificationViaEmail,
-      notificationViaSMS,
+      notificationViaSms,
       notificationViaApp,
       termsAndConditions,
     } = data;
@@ -136,7 +136,7 @@ exports.ustaAccountCreation = async (userId, data) => {
       password: hashedPassword || user.password,
       profilePicture: basicInfo.profilePicture,
       notificationViaEmail,
-      notificationViaSMS,
+      notificationViaSms,
       notificationViaApp,
       status: 'active',
     });
@@ -186,7 +186,7 @@ exports.ustaAccountCreation = async (userId, data) => {
       professionalDetail,
       availability,
       notificationViaEmail,
-      notificationViaSMS,
+      notificationViaSms,
       notificationViaApp,
     };
 

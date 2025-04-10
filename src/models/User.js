@@ -74,7 +74,7 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
-    notificationViaSMS: {
+    notificationViaSms: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },

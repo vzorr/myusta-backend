@@ -4,7 +4,7 @@
     "lastName": "Doe",
     "phoneNumber": "1234567890",
     "password": "password123",
-    "profilePicture": "https://example.com/profile.jpg"
+    "profilePicture": "base64"
   },
 
   "professionalDetail": {
@@ -27,11 +27,11 @@
         "media": [
           {
             "type": "image",
-            "url": "https://example.com/image1.jpg"
+            "url": "base64"
           },
           {
             "type": "video",
-            "url": "https://example.com/video1.mp4"
+            "url": "base64"
           }
         ]
       }
@@ -56,7 +56,7 @@
   },
 
   "notificationViaEmail": true,
-  "notificationViaSMS": false,
+  "notificationViaSms": false,
   "notificationViaApp": true,
   "termsAndConditions": true
 }
