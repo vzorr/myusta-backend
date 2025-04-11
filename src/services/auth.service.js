@@ -187,6 +187,13 @@ exports.googleSignup = async ({ identifier, signupMethod, role }) => {
   }
 };
 
+exports.facebookSignup = async ({ identifier, signupMethod, role }) => {
+  try {
+  } catch (error) {
+    logError(`Error in facebookSignup: ${error.message}`);
+    return { success: false, message: 'Facebook sign-up failed.', errors: [error.message] };
+  }
+};
 
 exports.signupResend = async (currentUser) => {
   try {

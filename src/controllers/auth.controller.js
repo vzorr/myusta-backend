@@ -31,6 +31,14 @@ exports.signup = async (req, res) => {
       return successResponse(res, result.message, result.data, 201);
     }
 
+    if (signupMethod === 'facebook') {
+      const result = await authService.facebookSignup({ signupMethod, ...others });
+      if (!result.success) {
+        return errorResponse(res, result.message, result.errors, 400);
+      }
+      return successResponse(res, result.message, result.data, 201);
+    }
+
     const result = await authService.signup({ signupMethod, ...others });
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
