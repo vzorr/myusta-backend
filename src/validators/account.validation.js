@@ -9,12 +9,12 @@ const customerAccountSchema = Joi.object({
       'string.pattern.base': 'Phone number must be 10-15 digits.',
       'any.required': 'Phone number is required.',
     }),
-    password: Joi.string().min(6).optional().messages({
-      'string.min': 'Password must be at least 6 characters long.',
-    }),
-    profilePicture: Joi.string().uri().optional().messages({
-      'string.uri': 'Invalid image URL.',
-    }),
+    password: Joi.string().pattern(
+      new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,}$")
+    ).messages({
+      "string.pattern.base": "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
+    }).optional(),
+    profilePicture: Joi.string().uri().optional(),
   }).required(),
 
   location: Joi.array().items(
@@ -42,7 +42,11 @@ const ustaAccountSchema = Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     phoneNumber: Joi.string().pattern(/^[0-9]{10,15}$/).required(),
-    password: Joi.string().min(6).optional(),
+    password: Joi.string().pattern(
+      new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,}$")
+    ).messages({
+      "string.pattern.base": "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
+    }).optional(),
     profilePicture: Joi.string().uri().optional(),
   }).required(),
 
