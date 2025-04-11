@@ -44,12 +44,12 @@ exports.createJob = async (jobData) => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'customer',
           attributes: ['id', 'firstName', 'lastName', 'email']
         },
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ]
     });
@@ -72,12 +72,12 @@ exports.getJobById = async (id) => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'customer',
           attributes: ['id', 'firstName', 'lastName', 'email']
         },
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ]
     });
@@ -105,7 +105,7 @@ exports.getUserJobs = async (userId) => {
       include: [
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ],
       order: [['createdAt', 'DESC']]
@@ -141,12 +141,12 @@ exports.getRecommendedJobs = async (ustaId) => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'customer',
           attributes: ['id', 'firstName', 'lastName', 'email']
         },
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ],
       where: {
@@ -171,12 +171,12 @@ exports.getMostRecentJobs = async () => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'customer',
           attributes: ['id', 'firstName', 'lastName', 'email']
         },
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ],
       order: [['createdAt', 'DESC']],

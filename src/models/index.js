@@ -23,7 +23,16 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
+// Job associations
 db.User.hasMany(db.Job, { foreignKey: 'userId', as: 'jobs' });
+db.Job.belongsTo(db.User, { foreignKey: 'userId', as: 'customer' });
+
+// Professional Detail associations
+db.User.hasOne(db.ProfessionalDetail, { foreignKey: 'userId', as: 'professionalDetail' });
+db.ProfessionalDetail.belongsTo(db.User, { foreignKey: 'userId', as: 'usta' });
+
+// Location associations
+db.Job.belongsTo(db.Location, { foreignKey: 'locationId', as: 'jobLocation' });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
