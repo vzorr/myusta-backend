@@ -136,7 +136,7 @@ exports.getRecommendedJobs = async (ustaId) => {
       return { success: false, message: 'Usta preferences not found', errors: ['Professional preferences not set'] };
     }
 
-    // Get all active jobs that match usta's preferences
+    // Get all jobs that match usta's preferences
     const jobs = await Job.findAll({
       include: [
         {
@@ -150,7 +150,6 @@ exports.getRecommendedJobs = async (ustaId) => {
         }
       ],
       where: {
-        status: 'active',
         category: {
           [Op.in]: usta.professionalDetail.preferences
         }
@@ -180,9 +179,6 @@ exports.getMostRecentJobs = async () => {
           as: 'location'
         }
       ],
-      where: {
-        status: 'active'
-      },
       order: [['createdAt', 'DESC']],
       limit: 50
     });
