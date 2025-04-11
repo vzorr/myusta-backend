@@ -9,7 +9,7 @@ const { ROLES } = require('../utils/constant');
 const { createJobSchema, updateJobSchema, jobIdSchema } = require('../validators/job.validator');
 
 router.get('/:id', validate(jobIdSchema, 'params'), jobController.getJobById);
-router.post('/', authenticate, authorized(ROLES.USTA), validate(createJobSchema), jobController.createJob);
+router.post('/', authenticate, authorized(ROLES.CUSTOMER), validate(createJobSchema), jobController.createJob);
 router.get('/user/jobs', authenticate, jobController.getUserJobs);
 
 module.exports = router;
