@@ -4,6 +4,11 @@ const { PREFRENCES } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const Job = sequelize.define('Job', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     title: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -43,6 +48,10 @@ module.exports = (sequelize) => {
     locationId: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'locations',
+        key: 'id',
+      },
     },
     budget: {
       type: DataTypes.FLOAT,
@@ -69,11 +78,6 @@ module.exports = (sequelize) => {
           if (!Array.isArray(value)) {
             throw new Error('Images must be an array');
           }
-        },
-        isValidImageArray(value) {
-          if (!value.every(item => typeof item === 'string' && item.startsWith('http'))) {
-            throw new Error('Each image must be a valid URL string');
-          }
         }
       }
     }
@@ -81,6 +85,7 @@ module.exports = (sequelize) => {
 
   Job.associate = (models) => {
     Job.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+    Job.belongsTo(models.Location, { foreignKey: 'locationId', as: 'location' });
   };
 
   return Job;

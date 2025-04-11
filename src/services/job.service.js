@@ -1,5 +1,5 @@
 // src/services/job.service.js
-const { Job, User } = require('../models');
+const { Job, User, Location } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
 
@@ -23,22 +23,38 @@ const createJob = async (jobData) => {
       }
     }
 
-    // Create job with image URLs
-    const newJob = await Job.create({
-      ...jobData,
-      images: imageUrls
-    });
-    
-    // Optionally fetch the job with associated user data
-    const jobWithUser = await Job.findByPk(newJob.id, {
-      include: [{
-        model: User,
-        as: 'user',
-        attributes: ['id', 'firstName', 'lastName', 'email']
-      }]
+    // Create location first
+    const location = await Location.create({
+      userId: jobData.userId,
+      address: jobData.location.address,
+      latitude: jobData.location.latitude,
+      longitude: jobData.location.longitude
     });
 
-    return { success: true, data: jobWithUser };
+    // Create job with image URLs and location ID
+    const { location: locationData, images: originalImages, ...restJobData } = jobData;
+    const newJob = await Job.create({
+      ...restJobData,
+      images: imageUrls,
+      locationId: location.id
+    });
+    
+    // Fetch the job with associated user and location data
+    const jobWithAssociations = await Job.findByPk(newJob.id, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        },
+        {
+          model: Location,
+          as: 'location'
+        }
+      ]
+    });
+
+    return { success: true, data: jobWithAssociations };
   } catch (error) {
     logger.error(`Error creating job: ${error.message}`);
     return { 
@@ -53,11 +69,17 @@ const getJobById = async (id) => {
   try {
     logger.info(`Fetching job with ID: ${id}`);
     const job = await Job.findByPk(id, {
-      include: [{
-        model: User,
-        as: 'user',
-        attributes: ['id', 'firstName', 'lastName', 'email']
-      }]
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        },
+        {
+          model: Location,
+          as: 'location'
+        }
+      ]
     });
 
     if (!job) {
@@ -81,11 +103,17 @@ const getUserJobs = async (userId) => {
     logger.info(`Fetching jobs for user ID: ${userId}`);
     const jobs = await Job.findAll({
       where: { userId },
-      include: [{
-        model: User,
-        as: 'user',
-        attributes: ['id', 'firstName', 'lastName', 'email']
-      }]
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        },
+        {
+          model: Location,
+          as: 'location'
+        }
+      ]
     });
 
     return { success: true, data: jobs };
