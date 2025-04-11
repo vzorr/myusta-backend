@@ -18,16 +18,11 @@
   }
 
   module.exports.PREFRENCES = {
-    PLUMBER: 'plumber',
-    ELECTRICIAN: 'electrician',
-    CARPENTER: 'carpenter',
-    CLEANER: 'cleaner',
-    LOCKSMITH: 'locksmith',
-    MOVING: 'moving',
-    PAINTER: 'painter',
-    PEST_CONTROL: 'pest_control',
-    HVAC: 'hvac',
-    APPLIANCE_REPAIR: 'appliance_repair'
+    PLUMBER: 'Plumber',
+    ELECTRICIAN: 'Electrician',
+    CARPENTER: 'Carpenter',
+    CLEANER: 'Cleaner',
+    PAINTER: 'Painter',
   }
 
   module.exports.PREFERRED_JOB_TYPES = {
