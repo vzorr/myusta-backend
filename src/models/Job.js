@@ -1,6 +1,6 @@
 // src/models/Job.js
 const { DataTypes } = require('sequelize');
-const { PREFRENCES } = require('../utils/constant');
+const { PREFRENCES, PAYMENT_METHODS, JOB_STATUS } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const Job = sequelize.define('Job', {
@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
       allowNull: false,
     },
     paymentMethod: {
-      type: DataTypes.ENUM('cash', 'card'),
+      type: DataTypes.ENUM(...Object.values(PAYMENT_METHODS)),
       allowNull: false,
     },
     category: {
@@ -58,8 +58,8 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM('pending', 'active', 'completed'),
-      defaultValue: 'pending',
+      type: DataTypes.ENUM(...Object.values(JOB_STATUS)),
+      defaultValue: JOB_STATUS.PENDING,
     },
     userId: {
       type: DataTypes.UUID,
