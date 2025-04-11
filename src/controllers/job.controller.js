@@ -3,6 +3,7 @@ const jobService = require('../services/job.service');
 const { successResponse, errorResponse } = require('../utils/response');
 const { logger } = require('../utils/logger');
 
+// Create a new job (POST /)
 exports.createJob = async (req, res, next) => {
   try {
     const jobData = { ...req.body, userId: req.user.id };
@@ -21,6 +22,7 @@ exports.createJob = async (req, res, next) => {
   }
 };
 
+// Get job by ID (GET /:id)
 exports.getJobById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -39,6 +41,7 @@ exports.getJobById = async (req, res, next) => {
   }
 };
 
+// Get jobs for authenticated customer (GET /user/jobs)
 exports.getUserJobs = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -56,3 +59,6 @@ exports.getUserJobs = async (req, res, next) => {
     return next({ statusCode: 500, message: 'Internal server error' });
   }
 };
+
+// TODO: Usta job controllers to be implemented later
+// exports.getUstaJobs = async (req, res, next) => { ... };
