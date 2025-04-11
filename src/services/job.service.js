@@ -3,10 +3,9 @@ const { Job, User, Location } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
 
-const createJob = async (jobData) => {
+// Create a new job
+exports.createJob = async (jobData) => {
   try {
-    logger.info('Creating a new job in the database');
-    
     // Handle image uploads if images are provided
     let imageUrls = [];
     if (jobData.images && jobData.images.length > 0) {
@@ -38,8 +37,8 @@ const createJob = async (jobData) => {
       images: imageUrls,
       locationId: location.id
     });
-    
-    // Fetch the job with associated user and location data
+
+    // Fetch the job with associations
     const jobWithAssociations = await Job.findByPk(newJob.id, {
       include: [
         {
@@ -65,9 +64,9 @@ const createJob = async (jobData) => {
   }
 };
 
-const getJobById = async (id) => {
+// Get job by ID
+exports.getJobById = async (id) => {
   try {
-    logger.info(`Fetching job with ID: ${id}`);
     const job = await Job.findByPk(id, {
       include: [
         {
@@ -83,52 +82,41 @@ const getJobById = async (id) => {
     });
 
     if (!job) {
-      logger.warn(`Job not found with ID: ${id}`);
-      return { success: false, statusCode: 404, message: 'Job not found' };
+      return {
+        success: false,
+        message: 'Job not found',
+        statusCode: 404
+      };
     }
 
     return { success: true, data: job };
   } catch (error) {
-    logger.error(`Error fetching job by ID: ${error.message}`);
-    return { 
-      success: false, 
-      message: 'Database error while fetching job', 
-      errors: [error.message] 
-    };
+    logger.error(`Error fetching job: ${error.message}`);
+    return { success: false, message: 'Database error', errors: [error.message] };
   }
 };
 
-const getUserJobs = async (userId) => {
+// Get jobs for a specific user
+exports.getUserJobs = async (userId) => {
   try {
-    logger.info(`Fetching jobs for user ID: ${userId}`);
     const jobs = await Job.findAll({
       where: { userId },
       include: [
         {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'firstName', 'lastName', 'email']
-        },
-        {
           model: Location,
           as: 'location'
         }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     });
 
     return { success: true, data: jobs };
   } catch (error) {
     logger.error(`Error fetching user jobs: ${error.message}`);
-    return { 
-      success: false, 
-      message: 'Database error while fetching user jobs', 
-      errors: [error.message] 
-    };
+    return { success: false, message: 'Database error', errors: [error.message] };
   }
 };
 
-module.exports = {
-  createJob,
-  getJobById,
-  getUserJobs
-};
+// TODO: Usta job services to be implemented later
+// exports.getRecommendedJobs = async (ustaId) => { ... };
+// exports.getMostRecentJobs = async () => { ... };
