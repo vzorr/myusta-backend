@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { PREFRENCES } = require('../utils/constant');
+const { ALLOWED_CATEGORY_KEYS, ALLOWED_JOB_TYPES } = require('../utils/constant');
 
 const customerAccountSchema = Joi.object({
   basicInfo: Joi.object({
@@ -14,7 +14,7 @@ const customerAccountSchema = Joi.object({
     ).messages({
       "string.pattern.base": "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
     }).optional(),
-    profilePicture: Joi.string().uri().optional(),
+    profilePicture: Joi.string().optional(),
   }).required(),
 
   location: Joi.array().items(
@@ -25,7 +25,7 @@ const customerAccountSchema = Joi.object({
     })
   ).optional(),
 
-  customerPreferences: Joi.array().items(Joi.string().valid(...Object.values(PREFRENCES))).optional().messages({
+  customerPreferences: Joi.array().items(Joi.string().valid(...ALLOWED_CATEGORY_KEYS)).optional().messages({
     'array.base': 'Customer preferences must be an array',
     'any.only': 'Each preference must be one of the predefined categories'
   }),
@@ -47,14 +47,14 @@ const ustaAccountSchema = Joi.object({
     ).messages({
       "string.pattern.base": "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
     }).optional(),
-    profilePicture: Joi.string().uri().optional(),
+    profilePicture: Joi.string().optional(),
   }).required(),
 
   professionalDetail: Joi.object({
     nipt: Joi.string().optional(),
     experiences: Joi.array().items(
       Joi.object({
-        category: Joi.string().valid(...Object.values(PREFRENCES)).required().messages({
+        category: Joi.string().valid(...ALLOWED_CATEGORY_KEYS).required().messages({
           'any.only': 'Category must be one of the predefined categories'
         }),
         yearsOfExp: Joi.number().integer().min(0).max(50).required(),
@@ -64,7 +64,7 @@ const ustaAccountSchema = Joi.object({
       Joi.object({
         title: Joi.string().max(80).required(),
         description: Joi.string().max(600).required(),
-        category: Joi.string().valid(...Object.values(PREFRENCES)).required().messages({
+        category: Joi.string().valid(...ALLOWED_CATEGORY_KEYS).required().messages({
           'any.only': 'Category must be one of the predefined categories'
         }),
         media: Joi.array().items(
@@ -88,7 +88,7 @@ const ustaAccountSchema = Joi.object({
       min: Joi.number().required(),
       max: Joi.number().required(),
     }).required(),
-    preferredJobTypes: Joi.array().items(Joi.string()).optional(),
+    preferredJobTypes: Joi.array().items(Joi.string().valid(...ALLOWED_JOB_TYPES)).required(),
   }).required(),
 
   notificationViaEmail: Joi.boolean().optional(),

@@ -1,6 +1,6 @@
 // src/validators/job.validator.js
 const Joi = require('joi');
-const { PREFRENCES } = require('../utils/constant');
+const { ALLOWED_CATEGORY_KEYS } = require('../utils/constant');
 
 const locationSchema = Joi.object({
   address: Joi.string().required().messages({
@@ -46,7 +46,7 @@ const createJobSchema = Joi.object({
     'any.required': 'Payment method is required',
   }),
 
-  category: Joi.string().valid(...Object.values(PREFRENCES)).required().messages({
+  category: Joi.string().valid(...ALLOWED_CATEGORY_KEYS).required().messages({
     'string.base': 'Category must be a string',
     'string.empty': 'Category is required',
     'any.only': 'Category must be one of the predefined categories',
@@ -120,7 +120,7 @@ const updateJobSchema = Joi.object({
     'any.only': 'Payment method must be either "fixed" or "hourly"',
   }),
 
-  category: Joi.string().valid(...Object.values(PREFRENCES)).messages({
+  category: Joi.string().valid(...ALLOWED_CATEGORY_KEYS).messages({
     'string.base': 'Category must be a string',
     'any.only': 'Category must be one of the predefined categories',
   }),

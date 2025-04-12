@@ -1,44 +1,68 @@
-  module.exports.ROLES = {
+// constants.js
+
+const ROLES = {
   CUSTOMER: 'customer',
   USTA: 'usta',
-}
+};
 
-module.exports.STATUS = {
+const STATUS = {
   ACTIVE: 'active',
   INPROGRESS: 'inprogress',
   INACTIVE: 'inactive',
   BLOCKED: 'blocked',
-}
+};
 
-module.exports.AUTH_PROVIDERS = {
+const AUTH_PROVIDERS = {
   EMAIL: 'email',
   PHONE: 'phone',
   GOOGLE: 'google',
   FACEBOOK: 'facebook',
-}
+};
 
-module.exports.PREFRENCES = {
-  PLUMBER: 'Plumber',
-  ELECTRICIAN: 'Electrician',
-  CARPENTER: 'Carpenter',
-  CLEANER: 'Cleaner',
-  PAINTER: 'Painter',
-}
-
-module.exports.PAYMENT_METHODS = {
+const PAYMENT_METHODS = {
   CASH: 'cash',
   CARD: 'card',
-}
+};
 
-module.exports.JOB_STATUS = {
+const JOB_STATUS = {
   PENDING: 'pending',
   ACTIVE: 'active',
   COMPLETED: 'completed',
   CANCELLED: 'cancelled',
-}
+};
 
-module.exports.PREFERRED_JOB_TYPES = {
-  SHORT_TERM: 'short_term',
-  LONG_TERM: 'long_term',
-  EMERGENCY: 'emergency',
-}
+// categories.js
+const CATEGORY = [
+  { key: 'plumber', name: 'Plumber' },
+  { key: 'electrician', name: 'Electrician' },
+  { key: 'carpenter', name: 'Carpenter' },
+  { key: 'cleaner', name: 'Cleaner' },
+  { key: 'painter', name: 'Painter' }
+]
+
+// Allowed category keys (e.g., ['plumber', 'electrician', ...])
+const ALLOWED_CATEGORY_KEYS = CATEGORY.map(category => category.key);
+
+
+// jobTypes.js
+const PREFERRED_JOB_TYPES = [
+  { key: 'short_term', name: 'Short Term' },
+  { key: 'long_term', name: 'Long Term' },
+  { key: 'emergency', name: 'Emergency' },
+]
+
+// Allowed keys extract karne ke liye pehle PREFERRED_JOB_TYPES declare hona chahiye
+const ALLOWED_JOB_TYPES = PREFERRED_JOB_TYPES.map(jobType => jobType.key);
+
+// Export dono cheezein
+module.exports = {
+  PREFERRED_JOB_TYPES,
+  ALLOWED_JOB_TYPES,
+  CATEGORY,
+  ALLOWED_CATEGORY_KEYS,
+  ROLES,
+  STATUS,
+  AUTH_PROVIDERS,
+  PAYMENT_METHODS,
+  JOB_STATUS,
+};

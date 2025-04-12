@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  const Preference = sequelize.define('Preference', {
+  const Category = sequelize.define('Category', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -12,12 +12,12 @@ module.exports = (sequelize) => {
       allowNull: false,
       unique: true,
     },
-    slug: {
+    key: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
   });
 
-  return Preference;
+  return Category;
 };

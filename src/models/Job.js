@@ -1,6 +1,6 @@
 // src/models/Job.js
 const { DataTypes } = require('sequelize');
-const { PREFRENCES, PAYMENT_METHODS, JOB_STATUS } = require('../utils/constant');
+const { ALLOWED_CATEGORY_KEYS, PAYMENT_METHODS, JOB_STATUS } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const Job = sequelize.define('Job', {
@@ -22,7 +22,7 @@ module.exports = (sequelize) => {
       allowNull: false,
     },
     category: {
-      type: DataTypes.ENUM(...Object.values(PREFRENCES)),
+      type: DataTypes.ENUM(...ALLOWED_CATEGORY_KEYS),
       allowNull: false,
     },
     areaSize: {
