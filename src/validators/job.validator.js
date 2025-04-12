@@ -23,7 +23,7 @@ const locationSchema = Joi.object({
 });
 
 const createJobSchema = Joi.object({
-  title: Joi.string().min(5).max(100).required().messages({
+  title: Joi.string().min(1).max(100).required().messages({
     'string.base': 'Title must be a string',
     'string.empty': 'Title is required',
     'string.min': 'Title must be at least 5 characters',
@@ -31,7 +31,7 @@ const createJobSchema = Joi.object({
     'any.required': 'Title is required',
   }),
 
-  description: Joi.string().min(20).max(2000).required().messages({
+  description: Joi.string().min(1).max(2000).required().messages({
     'string.base': 'Description must be a string',
     'string.empty': 'Description is required',
     'string.min': 'Description must be at least 20 characters',
@@ -103,13 +103,13 @@ const createJobSchema = Joi.object({
 });
 
 const updateJobSchema = Joi.object({
-  title: Joi.string().min(5).max(100).messages({
+  title: Joi.string().min(1).max(100).messages({
     'string.base': 'Title must be a string',
     'string.min': 'Title must be at least 5 characters',
     'string.max': 'Title cannot exceed 100 characters',
   }),
 
-  description: Joi.string().min(20).max(2000).messages({
+  description: Joi.string().min(1).max(2000).messages({
     'string.base': 'Description must be a string',
     'string.min': 'Description must be at least 20 characters',
     'string.max': 'Description cannot exceed 2000 characters',
