@@ -24,7 +24,8 @@ const {
   Verification,
   ProfessionalDetail,
   Location,
-  Availability
+  Availability,
+  SavedJob
 } = db;
 
 // User ↔ Job
@@ -32,7 +33,7 @@ User.hasMany(Job, { foreignKey: 'userId', as: 'jobs' });
 Job.belongsTo(User, { foreignKey: 'userId', as: 'customer' });
 
 // Location associations
-db.Job.belongsTo(db.Location, { foreignKey: 'locationId', as: 'jobLocation' });
+Job.belongsTo(Location, { foreignKey: 'locationId', as: 'jobLocation' });
 
 // User ↔ Portfolio
 User.hasMany(Portfolio, { foreignKey: 'userId', as: 'portfolios' });
@@ -61,6 +62,13 @@ Job.belongsTo(Location, { foreignKey: 'locationId', as: 'location' });
 // Availability ↔ Location
 Location.hasMany(Availability, { foreignKey: 'locationId', as: 'availabilities' });
 Availability.belongsTo(Location, { foreignKey: 'locationId', as: 'location' });
+
+// SavedJob ↔ User
+SavedJob.belongsTo(User, { foreignKey: 'ustaId', as: 'usta' });
+SavedJob.belongsTo(Job, { foreignKey: 'jobId', as: 'job' });
+
+// User ↔ SavedJob
+User.hasMany(SavedJob, { foreignKey: 'ustaId', as: 'savedJobs' });
 
 // Sequelize setup
 db.sequelize = sequelize;

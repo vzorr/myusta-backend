@@ -54,7 +54,7 @@ exports.customerAccountCreation = async (userId, data) => {
     });
 
     // Remove existing locations for the user
-    await Location.destroy({ where: { userId } });
+    await Location.destroy({ where: { userId, whoseLocation: "customer" } });
 
     // Create new locations
     if (location && location.length > 0) {
@@ -62,6 +62,7 @@ exports.customerAccountCreation = async (userId, data) => {
         location.map(async (loc) => {
           await Location.create({
             userId,
+            whoseLocation: "customer",
             latitude: loc.latitude,
             longitude: loc.longitude,
             address: loc.address,
@@ -171,9 +172,11 @@ exports.ustaAccountCreation = async (userId, data) => {
 
     if (location) {
       await location.update({
+        whoseLocation: 'usta',
         latitude: locationPayload.latitude,
         longitude: locationPayload.longitude,
         address: locationPayload.address || null,
+        maxDistance: availability.maxDistance,
       });
     } else {
       location = await Location.create({
@@ -181,6 +184,8 @@ exports.ustaAccountCreation = async (userId, data) => {
         latitude: locationPayload.latitude,
         longitude: locationPayload.longitude,
         address: locationPayload.address || null,
+        whoseLocation: 'usta',
+        maxDistance: availability.maxDistance,
       });
     }
 
@@ -190,7 +195,6 @@ exports.ustaAccountCreation = async (userId, data) => {
     const availabilityData = {
       userId,
       locationId: location.id,
-      maxDistance: availability.maxDistance,
       budgetAmount: availability.budgetAmount,
       preferredJobTypes: availability.preferredJobTypes,
     };

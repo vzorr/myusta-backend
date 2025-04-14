@@ -73,6 +73,10 @@ exports.getUstaJobs = async (req, res, next) => {
       case 'most_recent':
         result = await jobService.getMostRecentJobs();
         break;
+      case 'saved':
+        result = await jobService.getSavedJobs(req.user.id);
+        break;
+
       default:
         logger.warn(`Invalid filter type: ${filter}`);
         return errorResponse(res, 'Invalid filter type. Must be either "recommended" or "most_recent"', [], 400);

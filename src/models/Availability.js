@@ -23,11 +23,6 @@ module.exports = (sequelize) => {
         key: 'id',
       },
     },
-    maxDistance: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 15,
-    },
     budgetAmount: {
       type: DataTypes.JSONB,
       allowNull: true,
