@@ -15,9 +15,13 @@ module.exports = (sequelize) => {
         key: 'id',
       },
     },
-    location: {
-      type: DataTypes.JSONB,
+    locationId: {
+      type: DataTypes.UUID,
       allowNull: true,
+      references: {
+        model: 'locations',
+        key: 'id',
+      },
     },
     maxDistance: {
       type: DataTypes.INTEGER,
@@ -31,11 +35,8 @@ module.exports = (sequelize) => {
     preferredJobTypes: {
       type: DataTypes.JSONB,
       allowNull: true,
-    }
-  },{
-
-  }
-);
+    },
+  });
 
   return Availability;
 };

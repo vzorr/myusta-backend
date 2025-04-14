@@ -1,4 +1,4 @@
-const { User, ProfessionalDetail, Location, Availability } = require('../models');
+const { User, ProfessionalDetail, Location, Availability, Portfolio } = require('../models');
 const bcrypt = require("bcrypt");
 const { logError } = require('../utils/logger');
 const { uploadImage } = require("../utils/imageUtils");
@@ -116,24 +116,21 @@ exports.ustaAccountCreation = async (userId, data) => {
       return { success: false, message: 'Terms and conditions must be accepted' };
     }
 
-    // Find the existing user by ID
     const user = await User.findByPk(userId);
     if (!user) {
       return { success: false, message: 'User not found', errors: ['User not found'] };
     }
 
-    // Hash the password if provided
-    let hashedPassword;
+    let hashedPassword = user.password;
     if (basicInfo.password) {
       hashedPassword = await bcrypt.hash(basicInfo.password, 10);
     }
 
-    // Update user details
     await user.update({
       firstName: basicInfo.firstName,
       lastName: basicInfo.lastName,
       phone: basicInfo.phoneNumber,
-      password: hashedPassword || user.password,
+      password: hashedPassword,
       profilePicture: basicInfo.profilePicture,
       notificationViaEmail,
       notificationViaSms,
@@ -141,58 +138,88 @@ exports.ustaAccountCreation = async (userId, data) => {
       status: 'active',
     });
 
-    // Check if professional detail already exists
     let professional = await ProfessionalDetail.findOne({ where: { userId } });
-
     if (professional) {
       await professional.update({
         nipt: professionalDetail.nipt,
         experiences: professionalDetail.experiences,
-        portfolio: professionalDetail.portfolio,
       });
     } else {
       await ProfessionalDetail.create({
         userId,
         nipt: professionalDetail.nipt,
         experiences: professionalDetail.experiences,
-        portfolio: professionalDetail.portfolio,
       });
     }
 
-    // Update or create Availability
-    let existingAvailability = await Availability.findOne({ where: { userId } });
+    if (Array.isArray(professionalDetail.portfolio)) {
+      await Portfolio.destroy({ where: { userId } });
+      for (const item of professionalDetail.portfolio) {
+        await Portfolio.create({
+          userId,
+          title: item.title,
+          description: item.description,
+          category: item.category,
+          media: item.media || [],
+        });
+      }
+    }
 
-    if (existingAvailability) {
-      await existingAvailability.update({
-        location: availability.location,
-        maxDistance: availability.maxDistance,
-        budgetAmount: availability.budgetAmount,
-        preferredJobTypes: availability.preferredJobTypes,
+    // ✅ Upsert Location (create if not exist, else update)
+    const locationPayload = availability.location;
+    let location = await Location.findOne({ where: { userId } });
+
+    if (location) {
+      await location.update({
+        latitude: locationPayload.latitude,
+        longitude: locationPayload.longitude,
+        address: locationPayload.address || null,
       });
     } else {
-      await Availability.create({
+      location = await Location.create({
         userId,
-        location: availability.location,
-        maxDistance: availability.maxDistance,
-        budgetAmount: availability.budgetAmount,
-        preferredJobTypes: availability.preferredJobTypes,
+        latitude: locationPayload.latitude,
+        longitude: locationPayload.longitude,
+        address: locationPayload.address || null,
       });
     }
 
+    // ✅ Upsert Availability
+    let existingAvailability = await Availability.findOne({ where: { userId } });
 
-    // Prepare the response
-    const responseData = {
-      basicInfo,
-      professionalDetail,
-      availability,
-      notificationViaEmail,
-      notificationViaSms,
-      notificationViaApp,
+    const availabilityData = {
+      userId,
+      locationId: location.id,
+      maxDistance: availability.maxDistance,
+      budgetAmount: availability.budgetAmount,
+      preferredJobTypes: availability.preferredJobTypes,
     };
 
-    return { success: true, message: 'Usta account created/updated successfully', data: responseData };
+    if (existingAvailability) {
+      await existingAvailability.update(availabilityData);
+    } else {
+      await Availability.create(availabilityData);
+    }
+
+    return {
+      success: true,
+      message: 'Usta account created/updated successfully',
+      data: {
+        basicInfo,
+        professionalDetail,
+        availability,
+        notificationViaEmail,
+        notificationViaSms,
+        notificationViaApp,
+      },
+    };
   } catch (error) {
     logError(`Error in usta account creation/update: ${error.message}`);
-    return { success: false, message: 'Failed to create/update usta account', errors: [error.message] };
+    return {
+      success: false,
+      message: 'Failed to create/update usta account',
+      errors: [error.message],
+    };
   }
 };
+
