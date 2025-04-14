@@ -60,5 +60,37 @@ exports.getUserJobs = async (req, res, next) => {
   }
 };
 
-// TODO: Usta job controllers to be implemented later
-// exports.getUstaJobs = async (req, res, next) => { ... };
+// Get jobs for Usta (GET /usta/jobs)
+exports.getUstaJobs = async (req, res, next) => {
+  try {
+    const { filter } = req.query;
+    let result;
+
+    switch (filter) {
+      case 'recommended':
+        result = await jobService.getRecommendedJobs(req.user.id);
+        break;
+      case 'most_recent':
+        result = await jobService.getMostRecentJobs();
+        break;
+      case 'saved':
+        result = await jobService.getSavedJobs(req.user.id);
+        break;
+
+      default:
+        logger.warn(`Invalid filter type: ${filter}`);
+        return errorResponse(res, 'Invalid filter type. Must be either "recommended" or "most_recent"', [], 400);
+    }
+
+    if (!result.success) {
+      logger.warn(`Failed to fetch ${filter} jobs for usta ID: ${req.user.id}`);
+      return errorResponse(res, result.message, result.errors, 500);
+    }
+
+    logger.info(`${filter} jobs fetched successfully for usta ID: ${req.user.id}`);
+    return successResponse(res, 'Jobs fetched successfully', result.data);
+  } catch (error) {
+    logger.error(`Unexpected error in getUstaJobs: ${error.message}`);
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};

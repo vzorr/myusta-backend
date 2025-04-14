@@ -1,7 +1,8 @@
+// models/Portfolio.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  const Availability = sequelize.define('Availability', {
+  const Portfolio = sequelize.define('Portfolio', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -11,27 +12,27 @@ module.exports = (sequelize) => {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'users',
+        model: 'users', 
         key: 'id',
       },
     },
-    locationId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: 'locations',
-        key: 'id',
-      },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    budgetAmount: {
-      type: DataTypes.JSONB,
+    description: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
-    preferredJobTypes: {
+    category: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    media: {
       type: DataTypes.JSONB,
       allowNull: true,
     },
   });
 
-  return Availability;
+  return Portfolio;
 };

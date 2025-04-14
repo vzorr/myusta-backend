@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const { PREFRENCES } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const ProfessionalDetail = sequelize.define('ProfessionalDetail', {
@@ -22,11 +23,7 @@ module.exports = (sequelize) => {
     experiences: {
       type: DataTypes.JSONB,
       allowNull: true,
-    },
-    portfolio: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
+    }
   });
 
   return ProfessionalDetail;

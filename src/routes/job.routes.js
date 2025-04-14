@@ -17,8 +17,7 @@ router.post('/', authenticate, authorized(ROLES.CUSTOMER), validate(createJobSch
 // List all jobs posted by the authenticated user (customer)
 router.get('/user/jobs', authenticate, authorized(ROLES.CUSTOMER), jobController.getUserJobs);
 
-// TODO: Usta job endpoints to be implemented later
-// // List relevant jobs for Usta (recommended or most recent)
-// router.get('/usta/jobs', authenticate, authorized(ROLES.USTA), jobController.getUstaJobs);
+// List relevant jobs for Usta (recommended or most recent)
+router.get('/usta/jobs', authenticate, authorized(ROLES.USTA), jobController.getUstaJobs);
 
 module.exports = router;

@@ -15,6 +15,9 @@ module.exports = (sequelize) => {
         key: 'id',
       },
     },
+    whoseLocation: {
+      type: DataTypes.ENUM('customer', 'usta', 'job'),
+    },
     address: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -26,7 +29,12 @@ module.exports = (sequelize) => {
     longitude: {
       type: DataTypes.DECIMAL(10, 7),
       allowNull: false,
-    }
+    },
+    maxDistance: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null
+    },
   });
 
   return Location;
