@@ -1,7 +1,8 @@
 // src/services/job.service.js
-const { Job, User, Location } = require('../models');
+const { Job, User, Location, ProfessionalDetail } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
+const { Op } = require('sequelize');
 
 // Create a new job
 exports.createJob = async (jobData) => {
@@ -43,12 +44,12 @@ exports.createJob = async (jobData) => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'customer',
           attributes: ['id', 'firstName', 'lastName', 'email']
         },
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ]
     });
@@ -71,12 +72,12 @@ exports.getJobById = async (id) => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'customer',
           attributes: ['id', 'firstName', 'lastName', 'email']
         },
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ]
     });
@@ -104,7 +105,7 @@ exports.getUserJobs = async (userId) => {
       include: [
         {
           model: Location,
-          as: 'location'
+          as: 'jobLocation'
         }
       ],
       order: [['createdAt', 'DESC']]
@@ -117,6 +118,74 @@ exports.getUserJobs = async (userId) => {
   }
 };
 
-// TODO: Usta job services to be implemented later
-// exports.getRecommendedJobs = async (ustaId) => { ... };
-// exports.getMostRecentJobs = async () => { ... };
+// Get recommended jobs for usta based on preferences
+exports.getRecommendedJobs = async (ustaId) => {
+  try {
+    // Get usta's preferences
+    const usta = await User.findByPk(ustaId, {
+      include: [
+        {
+          model: ProfessionalDetail,
+          as: 'professionalDetail',
+          attributes: ['preferences']
+        }
+      ]
+    });
+
+    if (!usta.professionalDetail || !usta.professionalDetail.preferences || usta.professionalDetail.preferences.length === 0) {
+      return { success: false, message: 'Usta preferences not found', errors: ['Professional preferences not set'] };
+    }
+
+    // Get all jobs that match usta's preferences
+    const jobs = await Job.findAll({
+      include: [
+        {
+          model: User,
+          as: 'customer',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        },
+        {
+          model: Location,
+          as: 'jobLocation'
+        }
+      ],
+      where: {
+        category: {
+          [Op.in]: usta.professionalDetail.preferences
+        }
+      },
+      order: [['createdAt', 'DESC']]
+    });
+
+    return { success: true, data: jobs };
+  } catch (error) {
+    logger.error(`Error fetching recommended jobs: ${error.message}`);
+    return { success: false, message: 'Database error', errors: [error.message] };
+  }
+};
+
+// Get most recent jobs
+exports.getMostRecentJobs = async () => {
+  try {
+    const jobs = await Job.findAll({
+      include: [
+        {
+          model: User,
+          as: 'customer',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        },
+        {
+          model: Location,
+          as: 'jobLocation'
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 50
+    });
+
+    return { success: true, data: jobs };
+  } catch (error) {
+    logger.error(`Error fetching recent jobs: ${error.message}`);
+    return { success: false, message: 'Database error', errors: [error.message] };
+  }
+};

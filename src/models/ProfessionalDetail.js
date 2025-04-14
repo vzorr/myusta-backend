@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const { PREFRENCES } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const ProfessionalDetail = sequelize.define('ProfessionalDetail', {

@@ -29,7 +29,10 @@ const {
 
 // User ↔ Job
 User.hasMany(Job, { foreignKey: 'userId', as: 'jobs' });
-Job.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Job.belongsTo(User, { foreignKey: 'userId', as: 'customer' });
+
+// Location associations
+db.Job.belongsTo(db.Location, { foreignKey: 'locationId', as: 'jobLocation' });
 
 // User ↔ Portfolio
 User.hasMany(Portfolio, { foreignKey: 'userId', as: 'portfolios' });
@@ -41,7 +44,7 @@ Verification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 // User ↔ ProfessionalDetail (One-to-One)
 User.hasOne(ProfessionalDetail, { foreignKey: 'userId', as: 'professionalDetail' });
-ProfessionalDetail.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+ProfessionalDetail.belongsTo(User, { foreignKey: 'userId', as: 'usta' });
 
 // User ↔ Availability
 User.hasOne(Availability, { foreignKey: 'userId', as: 'availability' });
