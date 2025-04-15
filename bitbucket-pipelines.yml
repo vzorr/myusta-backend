@@ -4,12 +4,10 @@ pipelines:
   branches:
     dev:
       - step:
-          name: 🚀 Deploy to PM2 Server
+          name: 🚀 Deploy to Server
           script:
             - mkdir -p ~/.ssh
             - echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
             - chmod 600 ~/.ssh/id_rsa
-            - eval "$(ssh-agent -s)"
-            - ssh-add ~/.ssh/id_rsa
             - echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-            - ssh -o StrictHostKeyChecking=no root@47.254.134.96 "bash /root/myusta-backend/deploy.sh"
+            - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@47.254.134.96 "bash /root/myusta-backend/deploy.sh"
