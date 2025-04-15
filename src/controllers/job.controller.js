@@ -94,3 +94,22 @@ exports.getUstaJobs = async (req, res, next) => {
     return next({ statusCode: 500, message: 'Internal server error' });
   }
 };
+
+// Save a job for a usta
+exports.saveJob = async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const ustaId = req.user.id;
+
+    const result = await jobService.saveJob(jobId, ustaId);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors);
+    }
+
+    return successResponse(res, result.message);
+  } catch (error) {
+    logger.error(`Error in saveJob controller: ${error.message}`);
+    return errorResponse(res, 'Internal server error', [error.message]);
+  }
+};
