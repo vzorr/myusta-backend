@@ -4,7 +4,7 @@ pipelines:
   branches:
     dev:
       - step:
-          name: 🚀 Deploy to PM2 Server (Simple)
+          name: 🚀 Deploy to Server
           script:
             - mkdir -p ~/.ssh
             - echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
