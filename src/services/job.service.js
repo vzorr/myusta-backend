@@ -1,9 +1,12 @@
 // src/services/job.service.js
-const { Job, User, Location, ProfessionalDetail, SavedJob, Availability } = require('../models');
+const { Job, User, Location, SavedJob, Availability, ProfessionalDetail } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
 const { Op } = require('sequelize');
 const sequelize = require('../models/index').sequelize;
+const { CATEGORY } = require('../utils/constant');
+
+const ALLOWED_CATEGORY_KEYS = CATEGORY.map(category => category.key);
 
 // Create a new job
 exports.createJob = async (jobData) => {
@@ -123,14 +126,9 @@ exports.getUserJobs = async (userId) => {
 // Get recommended jobs for usta based on preferences and location
 exports.getRecommendedJobs = async (ustaId) => {
   try {
-    // First get the usta's details with professional details and availability
+    // First get the usta's details with availability and professional details
     const usta = await User.findByPk(ustaId, {
       include: [
-        {
-          model: ProfessionalDetail,
-          as: 'professionalDetail',
-          attributes: ['category']
-        },
         {
           model: Availability,
           as: 'availability',
@@ -139,6 +137,11 @@ exports.getRecommendedJobs = async (ustaId) => {
             as: 'location',
             attributes: ['latitude', 'longitude', 'maxDistance']
           }]
+        },
+        {
+          model: ProfessionalDetail,
+          as: 'professionalDetail',
+          attributes: ['experiences']
         }
       ]
     });
@@ -150,33 +153,48 @@ exports.getRecommendedJobs = async (ustaId) => {
 
     const ustaLocation = usta.availability.location;
     const maxDistance = ustaLocation.maxDistance || 10000; // Default to 10km if not set
-    const ustaCategory = usta.professionalDetail?.category;
+    
+    // Get categories from experiences
+    const experiences = usta.professionalDetail?.experiences || [];
+    const ustaCategories = experiences.map(exp => exp.category).filter(cat => ALLOWED_CATEGORY_KEYS.includes(cat));
 
     // Haversine formula as a Sequelize literal
     const distanceQuery = `(
       6371 * acos(
         cos(radians(${ustaLocation.latitude})) * 
-        cos(radians(locations.latitude)) * 
-        cos(radians(locations.longitude) - radians(${ustaLocation.longitude})) + 
+        cos(radians("jobLocation".latitude)) * 
+        cos(radians("jobLocation".longitude) - radians(${ustaLocation.longitude})) + 
         sin(radians(${ustaLocation.latitude})) * 
-        sin(radians(locations.latitude))
+        sin(radians("jobLocation".latitude))
       )
     )`;
 
     // Build the where clause
     const whereClause = {};
-    if (ustaCategory) {
-      whereClause.category = ustaCategory;
+    if (ustaCategories.length > 0) {
+      whereClause.category = {
+        [Op.in]: ustaCategories
+      };
     }
 
     // Get jobs within distance and matching category if specified
     const jobs = await Job.findAll({
-      attributes: {
-        include: [
-          [sequelize.literal(distanceQuery), 'distance']
+      attributes: [
+        'id',
+        'title',
+        'description',
+        'category',
+        'budget',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ],
+      where: {
+        ...whereClause,
+        [Op.and]: [
+          sequelize.literal(`${distanceQuery} <= ${maxDistance/1000}`)
         ]
       },
-      where: whereClause,
       include: [
         {
           model: User,
@@ -187,7 +205,7 @@ exports.getRecommendedJobs = async (ustaId) => {
           model: Location,
           as: 'jobLocation',
           required: true,
-          where: sequelize.literal(`${distanceQuery} <= ${maxDistance/1000}`) // Convert meters to km
+          attributes: ['latitude', 'longitude', 'address']
         }
       ],
       order: [['createdAt', 'DESC']],
@@ -205,6 +223,16 @@ exports.getRecommendedJobs = async (ustaId) => {
 exports.getMostRecentJobs = async () => {
   try {
     const jobs = await Job.findAll({
+      attributes: [
+        'id',
+        'title',
+        'description',
+        'category',
+        'budget',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ],
       include: [
         {
           model: User,
