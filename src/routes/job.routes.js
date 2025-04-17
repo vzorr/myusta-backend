@@ -23,4 +23,7 @@ router.get('/user/jobs', authenticate, authorized(ROLES.CUSTOMER), jobController
 // List relevant jobs for Usta (recommended or most recent or saved)
 router.get('/usta/jobs', authenticate, authorized(ROLES.USTA), jobController.getUstaJobs);
 
+// Create a new job proposal for a job (only for Usta)
+router.post('/proposals', authenticate, authorized(ROLES.USTA), jobController.createJobProposal);
+
 module.exports = router;

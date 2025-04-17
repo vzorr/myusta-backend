@@ -1,5 +1,5 @@
 // src/services/job.service.js
-const { Job, User, Location, SavedJob, Availability, ProfessionalDetail } = require('../models');
+const { Job, User, Location, SavedJob, Availability, ProfessionalDetailJobProposal, Milestone } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
 const { Op } = require('sequelize');
@@ -322,5 +322,35 @@ exports.saveJob = async (jobId, ustaId) => {
   } catch (error) {
     logger.error(`Error saving job: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
+  }
+};
+
+exports.createJobProposal = async (proposalData) => {
+  try {
+    const { jobId, ustaId, milestones, ...rest } = proposalData;
+    const jobProposal = await JobProposal.create({
+      ...rest,
+      jobId,
+      createdBy: ustaId
+    });
+
+    // If milestones provided, create them
+    if (milestones && Array.isArray(milestones)) {
+      for (const ms of milestones) {
+        await Milestone.create({
+          ...ms,
+          jobProposalId: jobProposal.id
+        });
+      }
+    }
+
+    // Optionally fetch with milestones (TODO in v2) 
+    // const fullProposal = await JobProposal.findByPk(jobProposal.id, {
+    //   include: [{ model: Milestone, as: 'milestones' }]
+    // });
+
+    return { success: true, data: jobProposal };
+  } catch (error) {
+    return { success: false, message: error.message, errors: [error.message] };
   }
 };
