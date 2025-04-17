@@ -71,7 +71,7 @@ exports.getUstaJobs = async (req, res, next) => {
         result = await jobService.getRecommendedJobs(req.user.id);
         break;
       case 'most_recent':
-        result = await jobService.getMostRecentJobs();
+        result = await jobService.getMostRecentJobs(req.user.id);
         break;
       case 'saved':
         result = await jobService.getSavedJobs(req.user.id);

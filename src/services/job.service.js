@@ -212,7 +212,20 @@ exports.getRecommendedJobs = async (ustaId) => {
       limit: 50
     });
 
-    return { success: true, data: jobs };
+    // Get all saved job IDs for this Usta
+    const savedJobs = await SavedJob.findAll({
+      where: { ustaId },
+      attributes: ['jobId']
+    });
+    const savedJobIds = new Set(savedJobs.map(sj => sj.jobId));
+
+    // Add 'saved' flag to each job
+    const jobsWithSavedFlag = jobs.map(job => ({
+      ...job.toJSON(),
+      saved: savedJobIds.has(job.id)
+    }));
+
+    return { success: true, data: jobsWithSavedFlag };
   } catch (error) {
     logger.error(`Error fetching recommended jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -220,7 +233,7 @@ exports.getRecommendedJobs = async (ustaId) => {
 };
 
 // Get most recent jobs
-exports.getMostRecentJobs = async () => {
+exports.getMostRecentJobs = async (ustaId) => {
   try {
     const jobs = await Job.findAll({
       attributes: [
@@ -248,7 +261,20 @@ exports.getMostRecentJobs = async () => {
       limit: 50
     });
 
-    return { success: true, data: jobs };
+    // Get all saved job IDs for this Usta
+    const savedJobs = await SavedJob.findAll({
+      where: { ustaId },
+      attributes: ['jobId']
+    });
+    const savedJobIds = new Set(savedJobs.map(sj => sj.jobId));
+
+    // Add 'saved' flag to each job
+    const jobsWithSavedFlag = jobs.map(job => ({
+      ...job.toJSON(),
+      saved: savedJobIds.has(job.id)
+    }));
+
+    return { success: true, data: jobsWithSavedFlag };
   } catch (error) {
     logger.error(`Error fetching recent jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -282,7 +308,11 @@ exports.getSavedJobs = async (userId) => {
       limit: 50
     });
 
-    const jobs = savedJobs.map(entry => entry.job); // Just return the job
+    // Just return the jobs with saved: true
+    const jobs = savedJobs.map(entry => ({
+      ...entry.job.toJSON(),
+      saved: true
+    }));
 
     return { success: true, data: jobs };
   } catch (error) {
@@ -344,7 +374,7 @@ exports.createJobProposal = async (proposalData) => {
       }
     }
 
-    // Optionally fetch with milestones (TODO in v2) 
+    // Optionally fetch with milestones (TODO: App v2, not required in v1) 
     // const fullProposal = await JobProposal.findByPk(jobProposal.id, {
     //   include: [{ model: Milestone, as: 'milestones' }]
     // });
