@@ -1,5 +1,5 @@
 // src/services/job.service.js
-const { Job, User, Location, SavedJob, Availability, ProfessionalDetailJobProposal, Milestone } = require('../models');
+const { Job, User, Location, SavedJob, Availability, ProfessionalDetail, JobProposal, Milestone } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
 const { Op } = require('sequelize');
