@@ -126,7 +126,7 @@ exports.getUserJobs = async (userId) => {
 // Get recommended jobs for usta based on preferences and location
 exports.getRecommendedJobs = async (ustaId) => {
   try {
-    // First get the usta's details with availability and professional details
+    // Fetch Usta's details, including availability/location and professional experiences
     const usta = await User.findByPk(ustaId, {
       include: [
         {
@@ -152,11 +152,18 @@ exports.getRecommendedJobs = async (ustaId) => {
     }
 
     const ustaLocation = usta.availability.location;
-    const maxDistance = ustaLocation.maxDistance || 10000; // Default to 10km if not set
-    
-    // Get categories from experiences
+    const maxDistance = ustaLocation.maxDistance || 100; // default to 100km
+
+    // Get Usta's skills/categories ('experiences' is an array of objects with 'category')
     const experiences = usta.professionalDetail?.experiences || [];
-    const ustaCategories = experiences.map(exp => exp.category).filter(cat => ALLOWED_CATEGORY_KEYS.includes(cat));
+    const ustaCategories = experiences
+      .map(exp => exp.category)
+      .filter(cat => ALLOWED_CATEGORY_KEYS.includes(cat));
+
+    // If Usta has no categories, return empty list
+    if (ustaCategories.length === 0) {
+      return { success: true, data: [] };
+    }
 
     // Haversine formula as a Sequelize literal
     const distanceQuery = `(
@@ -169,15 +176,10 @@ exports.getRecommendedJobs = async (ustaId) => {
       )
     )`;
 
-    // Build the where clause
-    const whereClause = {};
-    if (ustaCategories.length > 0) {
-      whereClause.category = {
-        [Op.in]: ustaCategories
-      };
-    }
+    // Build the category overlap filter for JSONB using the Postgres ?| operator
+    const pgArray = "ARRAY[" + ustaCategories.map(cat => `'${cat}'`).join(",") + "]";
 
-    // Get jobs within distance and matching category if specified
+    // Query jobs matching both category and distance
     const jobs = await Job.findAll({
       attributes: [
         'id',
@@ -190,8 +192,8 @@ exports.getRecommendedJobs = async (ustaId) => {
         'updatedAt'
       ],
       where: {
-        ...whereClause,
         [Op.and]: [
+          sequelize.literal(`"Job"."category" ?| ${pgArray}`),
           sequelize.literal(`${distanceQuery} <= ${maxDistance/1000}`)
         ]
       },
