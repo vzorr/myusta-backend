@@ -95,14 +95,18 @@ exports.getJobById = async (id) => {
       };
     }
 
-    return { success: true, data: job };
+    // Count job proposals for this job
+    const jobProposalsCount = await JobProposal.count({ where: { jobId: id } });
+
+    // Add the count to the response
+    return { success: true, data: { ...job.toJSON(), jobProposalsCount } };
   } catch (error) {
     logger.error(`Error fetching job: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
   }
 };
 
-// Get jobs for a specific user
+// Get jobs for a specific user (customer)
 exports.getUserJobs = async (userId) => {
   try {
     const jobs = await Job.findAll({
@@ -116,7 +120,13 @@ exports.getUserJobs = async (userId) => {
       order: [['createdAt', 'DESC']]
     });
 
-    return { success: true, data: jobs };
+    // Add jobProposalsCount for each job
+    const jobsWithProposalCounts = await Promise.all(jobs.map(async (job) => {
+      const jobProposalsCount = await JobProposal.count({ where: { jobId: job.id } });
+      return { ...job.toJSON(), jobProposalsCount };
+    }));
+
+    return { success: true, data: jobsWithProposalCounts };
   } catch (error) {
     logger.error(`Error fetching user jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -384,5 +394,37 @@ exports.createJobProposal = async (proposalData) => {
     return { success: true, data: jobProposal };
   } catch (error) {
     return { success: false, message: error.message, errors: [error.message] };
+  }
+};
+
+// Get applied jobs (proposals) for a specific usta
+exports.getUstaAppliedJobs = async (ustaId) => {
+  try {
+    const proposals = await JobProposal.findAll({
+      where: { createdBy: ustaId },
+      include: [
+        {
+          model: Job,
+          as: 'job',
+          attributes: ['id', 'title', 'status']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    // Map to desired response format
+    const appliedJobs = proposals.map(proposal => ({
+      jobId: proposal.job?.id,
+      jobTitle: proposal.job?.title,
+      jobStatus: proposal.job?.status,
+      applicationId: proposal.id,
+      applicationStatus: proposal.status,
+      applicationDateTime: proposal.createdAt
+    }));
+
+    return { success: true, data: appliedJobs };
+  } catch (error) {
+    logger.error(`Error fetching applied jobs: ${error.message}`);
+    return { success: false, message: 'Database error', errors: [error.message] };
   }
 };
