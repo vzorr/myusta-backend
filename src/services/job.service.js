@@ -428,3 +428,111 @@ exports.getUstaAppliedJobs = async (ustaId) => {
     return { success: false, message: 'Database error', errors: [error.message] };
   }
 };
+
+// Get all job applications (proposals) for a specific job (for customer)
+exports.getJobApplications = async (jobId) => {
+  try {
+    // Fetch the job with customer info
+    const job = await Job.findByPk(jobId, {
+      include: [
+        {
+          model: User,
+          as: 'customer',
+          attributes: ['id', 'firstName', 'lastName']
+        }
+      ],
+      attributes: ['id', 'createdAt']
+    });
+    if (!job) {
+      return { success: false, message: 'Job not found', statusCode: 404 };
+    }
+
+    // Fetch all proposals for this job, with usta info
+    const proposals = await JobProposal.findAll({
+      where: { jobId },
+      include: [
+        {
+          model: User,
+          as: 'usta',
+          attributes: ['id', 'firstName', 'lastName', 'profilePicture']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    const applications = proposals.map(proposal => ({
+      proposalId: proposal.id,
+      ustaName: proposal.usta ? `${proposal.usta.firstName} ${proposal.usta.lastName}` : null,
+      ustaProfilePic: proposal.usta?.profilePicture || null,
+      proposalStartDate: proposal.startDate,
+      proposalEndDate: proposal.endDate,
+      totalPrice: proposal.totalCost
+    }));
+
+    return {
+      success: true,
+      data: {
+        totalProposals: proposals.length,
+        customerName: job.customer ? `${job.customer.firstName} ${job.customer.lastName}` : null,
+        jobCreatedAt: job.createdAt,
+        applications
+      }
+    };
+  } catch (error) {
+    logger.error(`Error fetching job applications: ${error.message}`);
+    return { success: false, message: 'Database error', errors: [error.message] };
+  }
+};
+
+// Get details for a specific job proposal
+exports.getJobProposalDetails = async (proposalId) => {
+  try {
+    const proposal = await JobProposal.findByPk(proposalId, {
+      include: [
+        {
+          model: User,
+          as: 'usta',
+          attributes: ['id', 'firstName', 'lastName']
+        },
+        {
+          model: Job,
+          as: 'job',
+          include: [
+            {
+              model: User,
+              as: 'customer',
+              attributes: ['id', 'firstName', 'lastName']
+            }
+          ],
+          attributes: ['id', 'title', 'createdAt', 'status']
+        }
+      ]
+    });
+
+    if (!proposal) {
+      return { success: false, message: 'Proposal not found', statusCode: 404 };
+    }
+
+    return {
+      success: true,
+      data: {
+        proposalId: proposal.id,
+        status: proposal.status,
+        proposalType: proposal.proposalType,
+        description: proposal.description,
+        startDate: proposal.startDate,
+        endDate: proposal.endDate,
+        totalCost: proposal.totalCost,
+        serviceFee: proposal.serviceFee,
+        finalPayment: proposal.finalPayment,
+        createdAt: proposal.createdAt,
+        usta: proposal.usta,
+        job: proposal.job,
+        customer: proposal.job?.customer
+      }
+    };
+  } catch (error) {
+    logger.error(`Error fetching proposal details: ${error.message}`);
+    return { success: false, message: 'Database error', errors: [error.message] };
+  }
+};
