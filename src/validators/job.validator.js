@@ -46,11 +46,14 @@ const createJobSchema = Joi.object({
     'any.required': 'Payment method is required',
   }),
 
-  category: Joi.string().valid(...ALLOWED_CATEGORY_KEYS).required().messages({
-    'string.base': 'Category must be a string',
-    'string.empty': 'Category is required',
-    'any.only': 'Category must be one of the predefined categories',
-    'any.required': 'Category is required',
+  category: Joi.array()
+  .items(Joi.string().valid(...ALLOWED_CATEGORY_KEYS))
+  .min(1)
+  .required()
+  .messages({
+    'array.base': 'Category must be an array of strings',
+    'array.includes': 'Each category must be one of the predefined categories',
+    'array.min': 'At least one category must be specified'
   }),
 
   areaSize: Joi.number().positive().optional().messages({

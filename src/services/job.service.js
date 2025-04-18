@@ -1,5 +1,5 @@
 // src/services/job.service.js
-const { Job, User, Location, SavedJob, Availability, ProfessionalDetail } = require('../models');
+const { Job, User, Location, SavedJob, Availability, ProfessionalDetail, JobProposal, Milestone } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
 const { Op } = require('sequelize');
@@ -126,7 +126,7 @@ exports.getUserJobs = async (userId) => {
 // Get recommended jobs for usta based on preferences and location
 exports.getRecommendedJobs = async (ustaId) => {
   try {
-    // First get the usta's details with availability and professional details
+    // Fetch Usta's details, including availability/location and professional experiences
     const usta = await User.findByPk(ustaId, {
       include: [
         {
@@ -152,11 +152,18 @@ exports.getRecommendedJobs = async (ustaId) => {
     }
 
     const ustaLocation = usta.availability.location;
-    const maxDistance = ustaLocation.maxDistance || 10000; // Default to 10km if not set
-    
-    // Get categories from experiences
+    const maxDistance = ustaLocation.maxDistance || 100; // default to 100km
+
+    // Get Usta's skills/categories ('experiences' is an array of objects with 'category')
     const experiences = usta.professionalDetail?.experiences || [];
-    const ustaCategories = experiences.map(exp => exp.category).filter(cat => ALLOWED_CATEGORY_KEYS.includes(cat));
+    const ustaCategories = experiences
+      .map(exp => exp.category)
+      .filter(cat => ALLOWED_CATEGORY_KEYS.includes(cat));
+
+    // If Usta has no categories, return empty list
+    if (ustaCategories.length === 0) {
+      return { success: true, data: [] };
+    }
 
     // Haversine formula as a Sequelize literal
     const distanceQuery = `(
@@ -169,15 +176,10 @@ exports.getRecommendedJobs = async (ustaId) => {
       )
     )`;
 
-    // Build the where clause
-    const whereClause = {};
-    if (ustaCategories.length > 0) {
-      whereClause.category = {
-        [Op.in]: ustaCategories
-      };
-    }
+    // Build the category overlap filter for JSONB using the Postgres ?| operator
+    const pgArray = "ARRAY[" + ustaCategories.map(cat => `'${cat}'`).join(",") + "]";
 
-    // Get jobs within distance and matching category if specified
+    // Query jobs matching both category and distance
     const jobs = await Job.findAll({
       attributes: [
         'id',
@@ -190,8 +192,8 @@ exports.getRecommendedJobs = async (ustaId) => {
         'updatedAt'
       ],
       where: {
-        ...whereClause,
         [Op.and]: [
+          sequelize.literal(`"Job"."category" ?| ${pgArray}`),
           sequelize.literal(`${distanceQuery} <= ${maxDistance/1000}`)
         ]
       },
@@ -212,7 +214,20 @@ exports.getRecommendedJobs = async (ustaId) => {
       limit: 50
     });
 
-    return { success: true, data: jobs };
+    // Get all saved job IDs for this Usta
+    const savedJobs = await SavedJob.findAll({
+      where: { ustaId },
+      attributes: ['jobId']
+    });
+    const savedJobIds = new Set(savedJobs.map(sj => sj.jobId));
+
+    // Add 'saved' flag to each job
+    const jobsWithSavedFlag = jobs.map(job => ({
+      ...job.toJSON(),
+      saved: savedJobIds.has(job.id)
+    }));
+
+    return { success: true, data: jobsWithSavedFlag };
   } catch (error) {
     logger.error(`Error fetching recommended jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -220,7 +235,7 @@ exports.getRecommendedJobs = async (ustaId) => {
 };
 
 // Get most recent jobs
-exports.getMostRecentJobs = async () => {
+exports.getMostRecentJobs = async (ustaId) => {
   try {
     const jobs = await Job.findAll({
       attributes: [
@@ -248,7 +263,20 @@ exports.getMostRecentJobs = async () => {
       limit: 50
     });
 
-    return { success: true, data: jobs };
+    // Get all saved job IDs for this Usta
+    const savedJobs = await SavedJob.findAll({
+      where: { ustaId },
+      attributes: ['jobId']
+    });
+    const savedJobIds = new Set(savedJobs.map(sj => sj.jobId));
+
+    // Add 'saved' flag to each job
+    const jobsWithSavedFlag = jobs.map(job => ({
+      ...job.toJSON(),
+      saved: savedJobIds.has(job.id)
+    }));
+
+    return { success: true, data: jobsWithSavedFlag };
   } catch (error) {
     logger.error(`Error fetching recent jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -282,7 +310,11 @@ exports.getSavedJobs = async (userId) => {
       limit: 50
     });
 
-    const jobs = savedJobs.map(entry => entry.job); // Just return the job
+    // Just return the jobs with saved: true
+    const jobs = savedJobs.map(entry => ({
+      ...entry.job.toJSON(),
+      saved: true
+    }));
 
     return { success: true, data: jobs };
   } catch (error) {
@@ -322,5 +354,35 @@ exports.saveJob = async (jobId, ustaId) => {
   } catch (error) {
     logger.error(`Error saving job: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
+  }
+};
+
+exports.createJobProposal = async (proposalData) => {
+  try {
+    const { jobId, ustaId, milestones, ...rest } = proposalData;
+    const jobProposal = await JobProposal.create({
+      ...rest,
+      jobId,
+      createdBy: ustaId
+    });
+
+    // If milestones provided, create them
+    if (milestones && Array.isArray(milestones)) {
+      for (const ms of milestones) {
+        await Milestone.create({
+          ...ms,
+          jobProposalId: jobProposal.id
+        });
+      }
+    }
+
+    // Optionally fetch with milestones (TODO: App v2, not required in v1) 
+    // const fullProposal = await JobProposal.findByPk(jobProposal.id, {
+    //   include: [{ model: Milestone, as: 'milestones' }]
+    // });
+
+    return { success: true, data: jobProposal };
+  } catch (error) {
+    return { success: false, message: error.message, errors: [error.message] };
   }
 };
