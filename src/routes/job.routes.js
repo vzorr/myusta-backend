@@ -20,10 +20,13 @@ router.post('/', authenticate, authorized(ROLES.CUSTOMER), validate(createJobSch
 // List all jobs posted by the authenticated user (customer)
 router.get('/user/jobs', authenticate, authorized(ROLES.CUSTOMER), jobController.getUserJobs);
 
-// List relevant jobs for Usta (recommended or most recent or saved)
+// List relevant jobs listings for Usta (recommended or most recent or saved)
 router.get('/usta/jobs', authenticate, authorized(ROLES.USTA), jobController.getUstaJobs);
 
 // Create a new job proposal for a job (only for Usta)
 router.post('/proposals', authenticate, authorized(ROLES.USTA), jobController.createJobProposal);
+
+// List applied jobs for Usta (proposals)
+router.get('/usta/applied-jobs', authenticate, authorized(ROLES.USTA), jobController.getUstaAppliedJobs);
 
 module.exports = router;

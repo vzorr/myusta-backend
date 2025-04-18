@@ -130,3 +130,22 @@ exports.createJobProposal = async (req, res, next) => {
     return next({ statusCode: 500, message: 'Internal server error' });
   }
 };
+
+// Get applied jobs for a specific usta
+exports.getUstaAppliedJobs = async (req, res, next) => {
+  try {
+    const ustaId = req.user.id;
+    const result = await jobService.getUstaAppliedJobs(ustaId);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 500);
+    }
+
+    logger.info(`Applied jobs fetched successfully for usta ID: ${ustaId}`);
+    return successResponse(res, 'Applied jobs fetched successfully', result.data);
+  } catch (error) {
+    logger.error(`Unexpected error in getUstaAppliedJobs: ${error.message}`);
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};
+
