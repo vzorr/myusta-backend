@@ -71,6 +71,10 @@ const PREFERRED_JOB_TYPES = [
 // Allowed keys extract karne ke liye pehle PREFERRED_JOB_TYPES declare hona chahiye
 const ALLOWED_JOB_TYPES = PREFERRED_JOB_TYPES.map(jobType => jobType.key);
 
+const PERCENTAGE = {
+  jobProposal : 10
+}
+
 // Export dono cheezein
 module.exports = {
   PREFERRED_JOB_TYPES,
@@ -85,4 +89,5 @@ module.exports = {
   PROPOSAL_TYPES,
   PROPOSAL_STATUS,
   MILESTONE_STATUS,
+  PERCENTAGE
 };

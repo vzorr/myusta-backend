@@ -1,6 +1,6 @@
 const { User, Category, Verification } = require('../models');
 const { logger } = require('../utils/logger');
-const { ROLES, STATUS, AUTH_PROVIDERS, PREFERRED_JOB_TYPES, CATEGORY, PAYMENT_METHODS, JOB_STATUS } = require('../utils/constant');
+const { ROLES, STATUS, AUTH_PROVIDERS, PREFERRED_JOB_TYPES, CATEGORY, PAYMENT_METHODS, JOB_STATUS, PERCENTAGE } = require('../utils/constant');
 
 
 const getAllCategories = async () => {
@@ -22,7 +22,8 @@ const getMetaData = async () => {
       preferredJobTypes: PREFERRED_JOB_TYPES,
       categories: CATEGORY,
       paymentMethods: PAYMENT_METHODS ? Object.values(PAYMENT_METHODS) : [],
-      jobStatus: JOB_STATUS ? Object.values(JOB_STATUS) : []
+      jobStatus: JOB_STATUS ? Object.values(JOB_STATUS) : [],
+      percentage: PERCENTAGE
     };
 
     return { success: true, data: metaData };
