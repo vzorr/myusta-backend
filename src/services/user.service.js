@@ -1,44 +1,34 @@
 const { User } = require('../models');
 const { logger } = require('../utils/logger');
 
-const getAllUsers = async () => {
+const getUstaProfile = async (userId) => {
   try {
-    const users = await User.findAll();
-    return { success: true, data: users };
-  } catch (error) {
-    logger.error(`Error fetching users: ${error.message}`);
-    return { success: false, message: 'Database error while fetching users', errors: [error.message] };
-  }
-};
-
-const createUser = async (userData) => {
-  try {
-    logger.info('Creating a new user in the database');
-    const newUser = await User.create(userData);
-    return { success: true, data: newUser };
-  } catch (error) {
-    logger.error(`Error creating user: ${error.message}`);
-    return { success: false, message: 'Database error while creating user', errors: [error.message] };
-  }
-};
-
-const getUserById = async (id) => {
-  try {
-    logger.info(`Fetching user with ID: ${id}`);
-    const user = await User.findByPk(id);
-    if (!user) {
-      logger.warn(`User not found with ID: ${id}`);
-      return { success: false, statusCode: 404, message: 'User not found' };
+    const usta = await User.findOne({ where: { id: userId, role: 'usta' } });
+    if (!usta) {
+      return { success: false, message: 'Usta not found' };
     }
-    return { success: true, data: user };
+    return { success: true, message: 'Usta profile fetched successfully', data: usta };
   } catch (error) {
-    logger.error(`Error fetching user by ID: ${error.message}`);
-    return { success: false, message: 'Database error while fetching user', errors: [error.message] };
+    logger.error(`Error fetching usta profile: ${error.message}`);
+    return { success: false, message: 'Database error while fetching usta profile', errors: [error.message] };
   }
-};
+}
+
+
+const getCustomerProfile = async (userId) => {
+  try {
+    const customer = await User.findOne({ where: { id: userId, role: 'customer' } });
+    if (!customer) {
+      return { success: false, message: 'Customer not found' };
+    }
+    return { success: true, message: 'Customer profile fetched successfully', data: customer };
+  } catch (error) {
+    logger.error(`Error fetching customer profile: ${error.message}`);
+    return { success: false, message: 'Database error while fetching customer profile', errors: [error.message] };
+  }
+}
 
 module.exports = {
-  getAllUsers,
-  createUser,
-  getUserById,
+  getUstaProfile,
+  getCustomerProfile
 };

@@ -103,3 +103,39 @@ exports.ustaAccount = async (req, res) => {
     return errorResponse(res, 'Error during account creation/update', [error.message], 500);
   }
 };
+
+exports.ustaProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const ustaId = req.params.id; // Assuming the ID is passed as a URL parameter
+
+    const result = await accountService.getUstaProfile(userId, ustaId);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 400);
+    }
+
+    return successResponse(res, result.message, result.data);
+  } catch (error) {
+    console.error('Error in ustaProfile:', error);
+    return errorResponse(res, 'Error fetching USTA profile', [error.message], 500);
+  }
+};
+
+exports.customerProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const customerId = req.params.id; // Assuming the ID is passed as a URL parameter
+
+    const result = await accountService.getCustomerProfile(userId, customerId);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 400);
+    }
+
+    return successResponse(res, result.message, result.data);
+  } catch (error) {
+    console.error('Error in customerProfile:', error);
+    return errorResponse(res, 'Error fetching customer profile', [error.message], 500);
+  }
+};

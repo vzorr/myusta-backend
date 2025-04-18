@@ -209,6 +209,7 @@ exports.ustaAccountCreation = async (userId, data) => {
       success: true,
       message: 'Usta account created/updated successfully',
       data: {
+        userId,
         basicInfo,
         professionalDetail,
         availability,
@@ -222,6 +223,93 @@ exports.ustaAccountCreation = async (userId, data) => {
     return {
       success: false,
       message: 'Failed to create/update usta account',
+      errors: [error.message],
+    };
+  }
+};
+
+exports.getUstaProfile = async (currentCustmerId, ustaId) => {
+  try {
+
+    const usta = await User.findOne({
+      where: { id: ustaId },
+      include: [
+        {
+          model: ProfessionalDetail,
+          as: 'professionalDetail'
+        },
+        {
+          model: Portfolio,
+          as: 'portfolios'
+        }
+      ],
+    })
+    if (!usta) {
+      return {
+        success: false,
+        message: 'Usta not found'
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Usta profile fetched successfully',
+      data: {
+        id: usta.id,
+        firstName: usta.firstName,
+        lastName: usta.lastName,
+        phone: usta.phone,
+        profilePicture: usta.profilePicture,
+        professionalDetail: usta.professionalDetail ? {
+          id: usta.professionalDetail.id,
+          nipt: usta.professionalDetail.nipt,
+          experiences: usta.professionalDetail.experiences,
+        } : {},
+        portfolios: usta.portfolios ? usta.portfolios.map(item => {
+          return {
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            category: item.category,
+            media: item.media
+          }
+        }) : [],
+
+      }
+    };
+  }
+  catch (error) {
+    logError(`Error in fetching usta profile: ${error.message}`);
+    return {
+      success: false,
+      message: 'Failed to fetch usta profile',
+      errors: [error.message],
+    };
+  }
+};
+exports.getCustomerProfile = async (userId, customerId) => {
+  try {
+    const customer = await User.findByPk(customerId);
+    if (!customer) {
+      return {
+        success: false,
+        message: 'Customer not found',
+        errors: ['Customer not found'],
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Customer profile fetched successfully',
+      data: {
+        ...customer.dataValues,
+      },
+    };
+  } catch (error) {
+    logError(`Error in fetching customer profile: ${error.message}`);
+    return {
+      success: false,
+      message: 'Failed to fetch customer profile',
       errors: [error.message],
     };
   }

@@ -27,5 +27,10 @@ router.post(
 );
 router.post('/usta-creation', authenticate, authorized(ROLES.USTA), validate(ustaAccountSchema), accountController.ustaAccount);
 
+// Fetch a specific ustaprofile by ID in customer app
+router.get('/usta-profile/:id', authenticate, authorized(ROLES.CUSTOMER), accountController.ustaProfile);
+// Fetch a specific customer profile by ID in ustaprofile app
+router.get('/customer-profile/:id', authenticate, authorized(ROLES.USTA), accountController.customerProfile);
+
 
 module.exports = router;
