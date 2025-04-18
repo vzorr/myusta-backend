@@ -149,3 +149,39 @@ exports.getUstaAppliedJobs = async (req, res, next) => {
   }
 };
 
+// Get all job applications (proposals) for a specific job (for customer)
+exports.getJobApplications = async (req, res, next) => {
+  try {
+    const jobId = req.params.id;
+    const result = await jobService.getJobApplications(jobId);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, result.statusCode || 500);
+    }
+
+    logger.info(`Job applications fetched successfully for job ID: ${jobId}`);
+    return successResponse(res, 'Job applications fetched successfully', result.data);
+  } catch (error) {
+    logger.error(`Unexpected error in getJobApplications: ${error.message}`);
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};
+
+// Get details for a specific job proposal
+exports.getJobProposalDetails = async (req, res, next) => {
+  try {
+    const proposalId = req.params.proposalId;
+    const result = await jobService.getJobProposalDetails(proposalId);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, result.statusCode || 500);
+    }
+
+    logger.info(`Job proposal details fetched for proposal ID: ${proposalId}`);
+    return successResponse(res, 'Job proposal details fetched successfully', result.data);
+  } catch (error) {
+    logger.error(`Unexpected error in getJobProposalDetails: ${error.message}`);
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};
+

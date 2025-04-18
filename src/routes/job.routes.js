@@ -8,17 +8,23 @@ const validate = require('../middlewares/validate');
 const { ROLES } = require('../utils/constant');
 const { createJobSchema, jobIdSchema } = require('../validators/job.validator');
 
-// Fetch a specific job by ID (requires authentication)
+// Fetch a specific job by ID
 router.get('/:id', authenticate, validate(jobIdSchema, 'params'), jobController.getJobById);
-
-// Save a job
-router.post('/:id/save', authenticate, authorized(ROLES.USTA), jobController.saveJob);
 
 // Create a new job (only for customers)
 router.post('/', authenticate, authorized(ROLES.CUSTOMER), validate(createJobSchema), jobController.createJob);
 
 // List all jobs posted by the authenticated user (customer)
 router.get('/user/jobs', authenticate, authorized(ROLES.CUSTOMER), jobController.getUserJobs);
+
+// List all job applications for a specific job (for customer)
+router.get('/:id/applications', authenticate, authorized(ROLES.CUSTOMER), jobController.getJobApplications);
+
+// Get details for a specific job proposal
+router.get('/proposals/:proposalId', authenticate, jobController.getJobProposalDetails);
+
+// Save a job
+router.post('/:id/save', authenticate, authorized(ROLES.USTA), jobController.saveJob);
 
 // List relevant jobs listings for Usta (recommended or most recent or saved)
 router.get('/usta/jobs', authenticate, authorized(ROLES.USTA), jobController.getUstaJobs);
