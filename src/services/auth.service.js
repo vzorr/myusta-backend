@@ -63,7 +63,7 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
 
     if (user) {
       const isVerified = signupMethod === 'email' ? user.emailVerified : user.phoneVerified;
-      const token = generateToken({ id: user.id });
+      const token = generateToken({ id: user.id, role: user.role });
 
       if (isVerified) {
         return {
@@ -91,7 +91,7 @@ exports.signup = async ({ identifier, signupMethod, role }) => {
     }
 
     // Token generate karo yahan, jab sure ho ke user exist karta hai
-    const token = generateToken({ id: user.id });
+    const token = generateToken({ id: user.id, role: user.role });
 
     await Verification.upsert({
       userId: user.id,
@@ -288,9 +288,12 @@ exports.signupVerify = async (data) => {
       message: 'User verified successfully',
       data: {
         userId: user.id,
+        isVerified: true,
         email: user.email,
         phone: user.phone,
         status: user.status,
+        role: user.role,
+        token: generateToken({ id: user.id, role: user.role }),
       },
     };
   } catch (error) {
