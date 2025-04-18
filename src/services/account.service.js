@@ -289,22 +289,47 @@ exports.getUstaProfile = async (currentCustmerId, ustaId) => {
 };
 exports.getCustomerProfile = async (userId, customerId) => {
   try {
-    const customer = await User.findByPk(customerId);
+    const customer = await User.findOne({
+      where: { id: customerId, role: 'customer' },
+      include: [
+        {
+          model: Location,
+          as: 'locations',
+          where: { whoseLocation: 'customer' },
+        }
+      ],
+    });
+
     if (!customer) {
       return {
         success: false,
         message: 'Customer not found',
-        errors: ['Customer not found'],
-      }
+      };
     }
 
     return {
       success: true,
       message: 'Customer profile fetched successfully',
       data: {
-        ...customer.dataValues,
-      },
+        id: customer.id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        phone: customer.phone,
+        profilePicture: customer.profilePicture,
+        locations: customer.locations ? customer.locations.map(item => {
+          return {
+            id: item.id,
+            latitude: item.latitude,
+            longitude: item.longitude,
+            address: item.address,
+            maxDistance: item.maxDistance,
+          };
+        }
+        ) : [],
+
+      }
     };
+
   } catch (error) {
     logError(`Error in fetching customer profile: ${error.message}`);
     return {

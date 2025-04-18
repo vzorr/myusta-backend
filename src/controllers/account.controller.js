@@ -124,10 +124,10 @@ exports.ustaProfile = async (req, res) => {
 
 exports.customerProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const currentUstaId  = req.user.id;
     const customerId = req.params.id; // Assuming the ID is passed as a URL parameter
 
-    const result = await accountService.getCustomerProfile(userId, customerId);
+    const result = await accountService.getCustomerProfile(currentUstaId, customerId);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
