@@ -22,8 +22,22 @@ module.exports = (sequelize) => {
       allowNull: false,
     },
     category: {
-      type: DataTypes.ENUM(...ALLOWED_CATEGORY_KEYS),
+      type: DataTypes.JSONB,
       allowNull: false,
+      defaultValue: [],
+      validate: {
+        isArrayOfAllowedCategories(value) {
+          if (!Array.isArray(value)) {
+            throw new Error('Category must be an array');
+          }
+          //validate allowed keys
+          value.forEach(cat => {
+            if (!ALLOWED_CATEGORY_KEYS.includes(cat)) {
+              throw new Error(`Invalid category: ${cat}`);
+            }
+          });
+        }
+      }
     },
     areaSize: {
       type: DataTypes.FLOAT,

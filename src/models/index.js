@@ -25,7 +25,9 @@ const {
   ProfessionalDetail,
   Location,
   Availability,
-  SavedJob
+  SavedJob,
+  JobProposal,
+  Milestone
 } = db;
 
 // User ↔ Job
@@ -69,6 +71,18 @@ SavedJob.belongsTo(Job, { foreignKey: 'jobId', as: 'job' });
 
 // User ↔ SavedJob
 User.hasMany(SavedJob, { foreignKey: 'ustaId', as: 'savedJobs' });
+
+// JobProposal ↔ User (Usta)
+User.hasMany(JobProposal, { foreignKey: 'createdBy', as: 'proposals' });
+JobProposal.belongsTo(User, { foreignKey: 'createdBy', as: 'usta' });
+
+// JobProposal ↔ Job
+Job.hasMany(JobProposal, { foreignKey: 'jobId', as: 'proposals' });
+JobProposal.belongsTo(Job, { foreignKey: 'jobId', as: 'job' });
+
+// JobProposal ↔ Milestone
+JobProposal.hasMany(Milestone, { foreignKey: 'jobProposalId', as: 'milestones' });
+Milestone.belongsTo(JobProposal, { foreignKey: 'jobProposalId', as: 'proposal' });
 
 // Sequelize setup
 db.sequelize = sequelize;

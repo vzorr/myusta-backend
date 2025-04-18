@@ -31,6 +31,23 @@ const JOB_STATUS = {
   CANCELLED: 'cancelled',
 };
 
+const PROPOSAL_TYPES = {
+  PROJECT: 'project',
+  MILESTONE: 'milestone',
+};
+
+const PROPOSAL_STATUS = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+};
+
+const MILESTONE_STATUS = {
+  PENDING: 'pending',
+  ONGOING: 'ongoing',
+  COMPLETED: 'completed',
+};
+
 // categories.js
 const CATEGORY = [
   { key: 'plumber', name: 'Plumber' },
@@ -65,4 +82,7 @@ module.exports = {
   AUTH_PROVIDERS,
   PAYMENT_METHODS,
   JOB_STATUS,
+  PROPOSAL_TYPES,
+  PROPOSAL_STATUS,
+  MILESTONE_STATUS,
 };

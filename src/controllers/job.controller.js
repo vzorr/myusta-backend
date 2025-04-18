@@ -71,7 +71,7 @@ exports.getUstaJobs = async (req, res, next) => {
         result = await jobService.getRecommendedJobs(req.user.id);
         break;
       case 'most_recent':
-        result = await jobService.getMostRecentJobs();
+        result = await jobService.getMostRecentJobs(req.user.id);
         break;
       case 'saved':
         result = await jobService.getSavedJobs(req.user.id);
@@ -111,5 +111,22 @@ exports.saveJob = async (req, res) => {
   } catch (error) {
     logger.error(`Error in saveJob controller: ${error.message}`);
     return errorResponse(res, 'Internal server error', [error.message]);
+  }
+};
+
+// Create a new job proposal for a job
+exports.createJobProposal = async (req, res, next) => {
+  try {
+    const ustaId = req.user.id;
+    const proposalData = req.body;
+
+    const result = await jobService.createJobProposal({ ustaId, ...proposalData });
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, 400);
+    }
+    return successResponse(res, 'Job proposal created successfully', result.data, 201);
+  } catch (error) {
+    return next({ statusCode: 500, message: 'Internal server error' });
   }
 };
