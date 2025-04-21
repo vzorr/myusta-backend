@@ -398,21 +398,50 @@ exports.createJobProposal = async (proposalData) => {
 };
 
 // Get applied jobs (proposals) for a specific usta
-exports.getUstaAppliedJobs = async (ustaId) => {
+exports.getUstaAppliedJobs = async (ustaId, queryData) => {
   try {
-    const proposals = await JobProposal.findAll({
-      where: { createdBy: ustaId },
-      include: [
-        {
+    const {
+      paginated = false,
+      page = 1,
+      limit = 10
+    } = queryData;
+
+    let proposals = [];
+    let totalCount = 0;
+
+    const whereClause = { createdBy: ustaId };
+
+    if (paginated) {
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await JobProposal.findAndCountAll({
+        where: whereClause,
+        include: [{
           model: Job,
           as: 'job',
           attributes: ['id', 'title', 'status']
-        }
-      ],
-      order: [['createdAt', 'DESC']]
-    });
+        }],
+        order: [['createdAt', 'DESC']],
+        offset,
+        limit
+      });
 
-    // Map to desired response format
+      proposals = rows;
+      totalCount = count;
+    } else {
+      proposals = await JobProposal.findAll({
+        where: whereClause,
+        include: [{
+          model: Job,
+          as: 'job',
+          attributes: ['id', 'title', 'status']
+        }],
+        order: [['createdAt', 'DESC']]
+      });
+
+      totalCount = proposals.length;
+    }
+
     const appliedJobs = proposals.map(proposal => ({
       jobId: proposal.job?.id,
       jobTitle: proposal.job?.title,
@@ -422,65 +451,136 @@ exports.getUstaAppliedJobs = async (ustaId) => {
       applicationDateTime: proposal.createdAt
     }));
 
-    return { success: true, data: appliedJobs };
+    return {
+      success: true,
+      message: 'Applied jobs fetched successfully',
+      data: {
+        data: appliedJobs,
+        totalItems: totalCount,
+        totalPages: paginated ? Math.ceil(totalCount / limit) : 1,
+        currentPage: paginated ? page : 1,
+        limit: paginated ? limit : totalCount,
+        hasNextPage: paginated ? (page * limit < totalCount) : false,
+        hasPreviousPage: paginated ? (page > 1) : false
+      }
+    };
+
   } catch (error) {
     logger.error(`Error fetching applied jobs: ${error.message}`);
-    return { success: false, message: 'Database error', errors: [error.message] };
+    return {
+      success: false,
+      message: 'Database error',
+      errors: [error.message]
+    };
   }
 };
 
-// Get all job applications (proposals) for a specific job (for customer)
-exports.getJobApplications = async (jobId) => {
+
+
+exports.getJobApplications = async (jobId, queryData) => {
   try {
-    // Fetch the job with customer info
+    const {
+      paginated = false,
+      page = 1,
+      limit = 10
+    } = queryData;
+
+    // Fetch the job and its associated customer info
     const job = await Job.findByPk(jobId, {
-      include: [
-        {
-          model: User,
-          as: 'customer',
-          attributes: ['id', 'firstName', 'lastName']
-        }
-      ],
+      include: [{
+        model: User,
+        as: 'customer',
+        attributes: ['id', 'firstName', 'lastName']
+      }],
       attributes: ['id', 'createdAt']
     });
+
     if (!job) {
-      return { success: false, message: 'Job not found', statusCode: 404 };
+      return {
+        success: false,
+        message: 'Job not found',
+        statusCode: 404
+      };
     }
 
-    // Fetch all proposals for this job, with usta info
-    const proposals = await JobProposal.findAll({
-      where: { jobId },
-      include: [
-        {
+    // Define query criteria
+    const whereClause = { jobId };
+    let proposals = [];
+    let totalCount = 0;
+
+    if (paginated) {
+      const offset = (page - 1) * limit;
+
+      // Paginated fetch
+      const { count, rows } = await JobProposal.findAndCountAll({
+        where: whereClause,
+        include: [{
           model: User,
           as: 'usta',
           attributes: ['id', 'firstName', 'lastName', 'profilePicture']
-        }
-      ],
-      order: [['createdAt', 'DESC']]
-    });
+        }],
+        order: [['createdAt', 'DESC']],
+        offset,
+        limit
+      });
 
+      proposals = rows;
+      totalCount = count;
+    } else {
+      // Fetch all proposals
+      proposals = await JobProposal.findAll({
+        where: whereClause,
+        include: [{
+          model: User,
+          as: 'usta',
+          attributes: ['id', 'firstName', 'lastName', 'profilePicture']
+        }],
+        order: [['createdAt', 'DESC']]
+      });
+
+      totalCount = proposals.length;
+    }
+
+    // Format the proposals into applications
     const applications = proposals.map(proposal => ({
       proposalId: proposal.id,
-      ustaName: proposal.usta ? `${proposal.usta.firstName} ${proposal.usta.lastName}` : null,
+      ustaName: proposal.usta
+        ? `${proposal.usta.firstName} ${proposal.usta.lastName}`
+        : null,
       ustaProfilePic: proposal.usta?.profilePicture || null,
       proposalStartDate: proposal.startDate,
       proposalEndDate: proposal.endDate,
       totalPrice: proposal.totalCost
     }));
 
+    // Build final paginated structure
     return {
       success: true,
+      message: 'Job applications fetched successfully',
       data: {
-        totalProposals: proposals.length,
-        customerName: job.customer ? `${job.customer.firstName} ${job.customer.lastName}` : null,
-        jobCreatedAt: job.createdAt,
-        applications
+        data: applications,
+        totalItems: totalCount,
+        totalPages: paginated ? Math.ceil(totalCount / limit) : 1,
+        currentPage: paginated ? page : 1,
+        limit: paginated ? limit : totalCount,
+        hasNextPage: paginated ? (page * limit < totalCount) : false,
+        hasPreviousPage: paginated ? (page > 1) : false,
+        meta: {
+          customerName: job.customer
+            ? `${job.customer.firstName} ${job.customer.lastName}`
+            : null,
+          jobCreatedAt: job.createdAt
+        }
       }
     };
+
   } catch (error) {
     logger.error(`Error fetching job applications: ${error.message}`);
-    return { success: false, message: 'Database error', errors: [error.message] };
+    return {
+      success: false,
+      message: 'Database error',
+      errors: [error.message]
+    };
   }
 };
 

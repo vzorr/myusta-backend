@@ -189,8 +189,22 @@ const jobIdSchema = Joi.object({
   }),
 });
 
+const jobApplicationsForCustomerSchema = Joi.object({
+  paginated: Joi.boolean().truthy('true').falsy('false').default(false),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).default(10)
+});
+
+  const getUstaAppliedJobsSchema = Joi.object({
+    paginated: Joi.boolean().truthy('true').falsy('false').default(false),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).default(10)
+  });
+
 module.exports = {
   createJobSchema,
   updateJobSchema,
   jobIdSchema,
+  jobApplicationsForCustomerSchema,
+  getUstaAppliedJobsSchema
 };

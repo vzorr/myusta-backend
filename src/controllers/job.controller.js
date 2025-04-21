@@ -135,7 +135,8 @@ exports.createJobProposal = async (req, res, next) => {
 exports.getUstaAppliedJobs = async (req, res, next) => {
   try {
     const ustaId = req.user.id;
-    const result = await jobService.getUstaAppliedJobs(ustaId);
+    const queryParams = req.query;
+    const result = await jobService.getUstaAppliedJobs(ustaId, queryParams);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 500);
@@ -153,7 +154,8 @@ exports.getUstaAppliedJobs = async (req, res, next) => {
 exports.getJobApplications = async (req, res, next) => {
   try {
     const jobId = req.params.id;
-    const result = await jobService.getJobApplications(jobId);
+    const queryParams = req.query;
+    const result = await jobService.getJobApplications(jobId, queryParams);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, result.statusCode || 500);
