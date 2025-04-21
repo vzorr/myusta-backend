@@ -35,6 +35,10 @@ module.exports = (sequelize) => {
       allowNull: true,
       defaultValue: null
     },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   });
 
   return Location;

@@ -1,6 +1,6 @@
 // src/models/JobProposal.js
 const { DataTypes } = require('sequelize');
-const { PROPOSAL_TYPES, PROPOSAL_STATUS } = require('../utils/constant');
+const { PROPOSAL_TYPES, PROPOSAL_STATUS, WHO_WILL_PROVIDE_MATERIAL } = require('../utils/constant');
 
 module.exports = (sequelize) => {
   const JobProposal = sequelize.define('JobProposal', {
@@ -57,6 +57,18 @@ module.exports = (sequelize) => {
         model: 'jobs',
         key: 'id',
       },
+    },
+    additionalDetails: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    whoWillProvideMaterial: {
+      type: DataTypes.ENUM(...Object.values(WHO_WILL_PROVIDE_MATERIAL)),
+      allowNull: true,
+    },
+    materialItems: {
+      type: DataTypes.JSONB,
+      allowNull: true,
     }
   });
 

@@ -75,6 +75,13 @@ const PERCENTAGE = {
   jobProposal : 10
 }
 
+// In src/utils/constant.js
+const WHO_WILL_PROVIDE_MATERIAL = {
+  CUSTOMER: 'customer',
+  USTA: 'usta',
+  PARTIAL: 'partial',
+};
+
 // Export dono cheezein
 module.exports = {
   PREFERRED_JOB_TYPES,
@@ -89,5 +96,6 @@ module.exports = {
   PROPOSAL_TYPES,
   PROPOSAL_STATUS,
   MILESTONE_STATUS,
-  PERCENTAGE
+  PERCENTAGE,
+  WHO_WILL_PROVIDE_MATERIAL
 };
