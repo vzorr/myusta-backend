@@ -4,7 +4,7 @@ pipelines:
   branches:
     dev:
       - step:
-          name: 🚀 Deploy to Server via SSH
+          name: 🚀 Deploy to Server via SSH (Step-by-Step)
           caches:
             - node
           script:
@@ -12,11 +12,19 @@ pipelines:
             - echo "$SSH_PRIVATE_KEY" > key.pem
             - chmod 600 key.pem
 
-            - echo "🔧 Connecting to server and running deployment commands..."
+            - echo "🔧 Connecting to server and running step-by-step deployment..."
             - |
               ssh -v -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
+                echo "📁 Step 1: Changing directory..." &&
                 cd /root/myusta-backend &&
+
+                echo "📥 Step 2: Pulling latest code..." &&
                 git pull origin dev &&
+
+                echo "📦 Step 3: Installing dependencies..." &&
                 npm install &&
+
+                echo "🚀 Step 4: Restarting or starting PM2 process..." &&
                 pm2 restart usta-app || pm2 start src/index.js --name usta-app &&
-                echo "✅ Deployment successful!"
+
+                echo "✅ Step 5: Deployment successful!"
