@@ -1,19 +1,22 @@
-image: node:20
+image: node:18
 
 pipelines:
   branches:
-    dev:
+    dev:  # Change this to the branch you want to trigger deployment from
       - step:
-          name: 🚀 Deploy USTA App to Ubuntu 22.04 Server
+          name: Deploy to Server via SSH
+          caches:
+            - node
           script:
-            - apt-get update && apt-get install -y openssh-client
-            - mkdir -p ~/.ssh
-            - echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-            - sudo chmod 600 ~/.ssh/id_rsa
-            - sudo ssh-keyscan -H 47.254.134.96 >> ~/.ssh/known_hosts
-            - sudo ssh root@47.254.134.96 '
+            - echo "🚀 Starting deployment..."
+            - echo "$SSH_PRIVATE_KEY" > key.pem
+            - chmod 600 key.pem
+
+            # OPTIONAL: Add known_hosts if you want strict SSH
+            # - ssh-keyscan -H your-server-ip >> ~/.ssh/known_hosts
+
+            - ssh -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
                 cd /root/myusta-backend &&
                 git pull origin dev &&
                 npm install &&
                 pm2 restart usta-app || pm2 start src/index.js --name usta-app
-              '
