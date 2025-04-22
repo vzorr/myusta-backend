@@ -2,7 +2,7 @@ image: node:18
 
 pipelines:
   branches:
-    dev:  # Replace with your branch name if different
+    dev:
       - step:
           name: 🚀 Deploy to Server via SSH
           caches:
@@ -12,13 +12,10 @@ pipelines:
             - echo "$SSH_PRIVATE_KEY" > key.pem
             - chmod 600 key.pem
 
-            # Optional: Add known_hosts for extra security (not needed if StrictHostKeyChecking=no)
-            # - ssh-keyscan -H 47.254.134.96 >> ~/.ssh/known_hosts
-
             - echo "🔧 Connecting to server and running deployment commands..."
             - ssh -v -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
                 cd /root/myusta-backend &&
                 git pull origin dev &&
                 npm install &&
                 pm2 restart usta-app || pm2 start src/index.js --name usta-app &&
-                echo "✅ Deployment successful!"
+                echo '\''✅ Deployment successful!'\'
