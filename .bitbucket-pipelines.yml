@@ -2,7 +2,7 @@ image: node:20
 
 pipelines:
   branches:
-    dev:  # 👈 trigger only when dev branch is pushed
+    dev:
       - step:
           name: 🚀 Deploy USTA App to Ubuntu 22.04 Server
           deployment: development
@@ -10,14 +10,10 @@ pipelines:
             - node
           script:
             - apt-get update && apt-get install -y openssh-client
-
-            # Prepare SSH access
             - mkdir -p ~/.ssh
             - echo "$SSH_KEY" > ~/.ssh/id_rsa
             - chmod 600 ~/.ssh/id_rsa
             - ssh-keyscan -H 47.254.134.96 >> ~/.ssh/known_hosts
-
-            # SSH into server and deploy
             - ssh root@47.254.134.96 '
                 cd /root/myusta-backend &&
                 git pull origin dev &&
