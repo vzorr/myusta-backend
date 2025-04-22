@@ -5,6 +5,7 @@ const { uploadJobImages } = require('../utils/imageUtils');
 const { Op } = require('sequelize');
 const sequelize = require('../models/index').sequelize;
 const { CATEGORY } = require('../utils/constant');
+const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
 
 const ALLOWED_CATEGORY_KEYS = CATEGORY.map(category => category.key);
 
@@ -108,9 +109,11 @@ exports.getJobById = async (id) => {
 };
 
 // Get jobs for a specific user (customer)
-exports.getUserJobs = async (userId) => {
+exports.getUserJobs = async (userId, query) => {
   try {
-    const jobs = await Job.findAll({
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await Job.findAndCountAll({
       where: { userId },
       include: [
         {
@@ -118,16 +121,20 @@ exports.getUserJobs = async (userId) => {
           as: 'jobLocation'
         }
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
     });
 
     // Add jobProposalsCount for each job
-    const jobsWithProposalCounts = await Promise.all(jobs.map(async (job) => {
+    const jobsWithProposalCounts = await Promise.all(rows.map(async (job) => {
       const jobProposalsCount = await JobProposal.count({ where: { jobId: job.id } });
       return { ...job.toJSON(), jobProposalsCount };
     }));
 
-    return { success: true, data: jobsWithProposalCounts };
+    const paginated = formatPaginatedResponse({ rows: jobsWithProposalCounts, count }, page, limit);
+
+    return { success: true, data: paginated };
   } catch (error) {
     logger.error(`Error fetching user jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -135,8 +142,10 @@ exports.getUserJobs = async (userId) => {
 };
 
 // Get recommended jobs for usta based on preferences and location
-exports.getRecommendedJobs = async (ustaId) => {
+exports.getRecommendedJobs = async (ustaId, query) => {
   try {
+    const { page, limit, offset } = getPaginationParams(query);
+
     // Fetch Usta's details, including availability/location and professional experiences
     const usta = await User.findByPk(ustaId, {
       include: [
@@ -159,7 +168,7 @@ exports.getRecommendedJobs = async (ustaId) => {
 
     // If no availability with location, return empty list
     if (!usta.availability?.location) {
-      return { success: true, data: [] };
+      return { success: true, data: formatPaginatedResponse({ rows: [], count: 0 }, page, limit) };
     }
 
     const ustaLocation = usta.availability.location;
@@ -173,7 +182,7 @@ exports.getRecommendedJobs = async (ustaId) => {
 
     // If Usta has no categories, return empty list
     if (ustaCategories.length === 0) {
-      return { success: true, data: [] };
+      return { success: true, data: formatPaginatedResponse({ rows: [], count: 0 }, page, limit) };
     }
 
     // Haversine formula as a Sequelize literal
@@ -190,8 +199,8 @@ exports.getRecommendedJobs = async (ustaId) => {
     // Build the category overlap filter for JSONB using the Postgres ?| operator
     const pgArray = "ARRAY[" + ustaCategories.map(cat => `'${cat}'`).join(",") + "]";
 
-    // Query jobs matching both category and distance
-    const jobs = await Job.findAll({
+    // Query jobs matching both category and distance, paginated
+    const { count, rows } = await Job.findAndCountAll({
       attributes: [
         'id',
         'title',
@@ -205,7 +214,7 @@ exports.getRecommendedJobs = async (ustaId) => {
       where: {
         [Op.and]: [
           sequelize.literal(`"Job"."category" ?| ${pgArray}`),
-          sequelize.literal(`${distanceQuery} <= ${maxDistance/1000}`)
+          sequelize.literal(`${distanceQuery} <= ${maxDistance / 1000}`)
         ]
       },
       include: [
@@ -222,7 +231,8 @@ exports.getRecommendedJobs = async (ustaId) => {
         }
       ],
       order: [['createdAt', 'DESC']],
-      limit: 50
+      limit,
+      offset
     });
 
     // Get all saved job IDs for this Usta
@@ -233,12 +243,12 @@ exports.getRecommendedJobs = async (ustaId) => {
     const savedJobIds = new Set(savedJobs.map(sj => sj.jobId));
 
     // Add 'saved' flag to each job
-    const jobsWithSavedFlag = jobs.map(job => ({
+    const jobsWithSavedFlag = rows.map(job => ({
       ...job.toJSON(),
       saved: savedJobIds.has(job.id)
     }));
 
-    return { success: true, data: jobsWithSavedFlag };
+    return { success: true, data: formatPaginatedResponse({ rows: jobsWithSavedFlag, count }, page, limit) };
   } catch (error) {
     logger.error(`Error fetching recommended jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -246,9 +256,11 @@ exports.getRecommendedJobs = async (ustaId) => {
 };
 
 // Get most recent jobs
-exports.getMostRecentJobs = async (ustaId) => {
+exports.getMostRecentJobs = async (ustaId, query) => {
   try {
-    const jobs = await Job.findAll({
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await Job.findAndCountAll({
       attributes: [
         'id',
         'title',
@@ -271,7 +283,8 @@ exports.getMostRecentJobs = async (ustaId) => {
         }
       ],
       order: [['createdAt', 'DESC']],
-      limit: 50
+      limit,
+      offset
     });
 
     // Get all saved job IDs for this Usta
@@ -282,12 +295,12 @@ exports.getMostRecentJobs = async (ustaId) => {
     const savedJobIds = new Set(savedJobs.map(sj => sj.jobId));
 
     // Add 'saved' flag to each job
-    const jobsWithSavedFlag = jobs.map(job => ({
+    const jobsWithSavedFlag = rows.map(job => ({
       ...job.toJSON(),
       saved: savedJobIds.has(job.id)
     }));
 
-    return { success: true, data: jobsWithSavedFlag };
+    return { success: true, data: formatPaginatedResponse({ rows: jobsWithSavedFlag, count }, page, limit) };
   } catch (error) {
     logger.error(`Error fetching recent jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -296,9 +309,11 @@ exports.getMostRecentJobs = async (ustaId) => {
 
 
 // Get saved jobs for a specific user (Usta)
-exports.getSavedJobs = async (userId) => {
+exports.getSavedJobs = async (userId, query) => {
   try {
-    const savedJobs = await SavedJob.findAll({
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await SavedJob.findAndCountAll({
       where: { ustaId: userId },
       include: [
         {
@@ -318,16 +333,17 @@ exports.getSavedJobs = async (userId) => {
         }
       ],
       order: [[{ model: Job, as: 'job' }, 'createdAt', 'DESC']],
-      limit: 50
+      limit,
+      offset
     });
 
     // Just return the jobs with saved: true
-    const jobs = savedJobs.map(entry => ({
+    const jobs = rows.map(entry => ({
       ...entry.job.toJSON(),
       saved: true
     }));
 
-    return { success: true, data: jobs };
+    return { success: true, data: formatPaginatedResponse({ rows: jobs, count }, page, limit) };
   } catch (error) {
     logger.error(`Error fetching saved jobs: ${error.message}`);
     return { success: false, message: 'Database error', errors: [error.message] };
@@ -399,71 +415,97 @@ exports.createJobProposal = async (proposalData) => {
 };
 
 // Get applied jobs (proposals) for a specific usta
-exports.getUstaAppliedJobs = async (ustaId) => {
+exports.getUstaAppliedJobs = async (ustaId, query) => {
   try {
-    const proposals = await JobProposal.findAll({
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await JobProposal.findAndCountAll({
       where: { createdBy: ustaId },
-      include: [
-        {
-          model: Job,
-          as: 'job',
-          attributes: ['id', 'title', 'status']
-        }
-      ],
-      order: [['createdAt', 'DESC']]
+      include: [{
+        model: Job,
+        as: 'job',
+        attributes: ['id', 'title', 'status']
+      }],
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
     });
 
-    // Map to desired response format
-    const appliedJobs = proposals.map(proposal => ({
-      jobId: proposal.job?.id,
-      jobTitle: proposal.job?.title,
-      jobStatus: proposal.job?.status,
-      applicationId: proposal.id,
-      applicationStatus: proposal.status,
-      applicationDateTime: proposal.createdAt
+    // For each proposal, fetch total proposals for that job
+    const appliedJobs = await Promise.all(rows.map(async proposal => {
+      let totalProposals = 0;
+      if (proposal.job?.id) {
+        totalProposals = await JobProposal.count({ where: { jobId: proposal.job.id } });
+      }
+      return {
+        jobId: proposal.job?.id,
+        jobTitle: proposal.job?.title,
+        jobStatus: proposal.job?.status,
+        applicationId: proposal.id,
+        applicationStatus: proposal.status,
+        applicationDateTime: proposal.createdAt,
+        totalProposals
+      };
     }));
 
-    return { success: true, data: appliedJobs };
+    return {
+      success: true,
+      message: 'Applied jobs fetched successfully',
+      data: formatPaginatedResponse({ rows: appliedJobs, count }, page, limit)
+    };
   } catch (error) {
     logger.error(`Error fetching applied jobs: ${error.message}`);
-    return { success: false, message: 'Database error', errors: [error.message] };
+    return {
+      success: false,
+      message: 'Database error',
+      errors: [error.message]
+    };
   }
 };
 
 // Get all job applications (proposals) for a specific job (for customer)
-exports.getJobApplications = async (jobId) => {
+exports.getJobApplications = async (jobId, query) => {
   try {
-    // Fetch the job with customer info
+    const { page, limit, offset } = getPaginationParams(query);
+
+    // Fetch the job and its associated customer info
     const job = await Job.findByPk(jobId, {
-      include: [
-        {
-          model: User,
-          as: 'customer',
-          attributes: ['id', 'firstName', 'lastName']
-        }
-      ],
-      attributes: ['id', 'createdAt']
+      include: [{
+        model: User,
+        as: 'customer',
+        attributes: ['id', 'firstName', 'lastName']
+      }],
+      attributes: ['id', 'createdAt', 'title']
     });
+
     if (!job) {
-      return { success: false, message: 'Job not found', statusCode: 404 };
+      return {
+        success: false,
+        message: 'Job not found',
+        statusCode: 404
+      };
     }
 
-    // Fetch all proposals for this job, with usta info
-    const proposals = await JobProposal.findAll({
+    // Paginated fetch of proposals for this job
+    const { count, rows } = await JobProposal.findAndCountAll({
       where: { jobId },
       include: [
         {
           model: User,
           as: 'usta',
-          attributes: ['id', 'firstName', 'lastName', 'profilePicture']
+          attributes: ['id', 'firstName', 'lastName']
         }
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
     });
 
-    const applications = proposals.map(proposal => ({
+    const applications = rows.map(proposal => ({
       proposalId: proposal.id,
-      ustaName: proposal.usta ? `${proposal.usta.firstName} ${proposal.usta.lastName}` : null,
+      ustaName: proposal.usta
+        ? `${proposal.usta.firstName} ${proposal.usta.lastName}`
+        : null,
       ustaProfilePic: proposal.usta?.profilePicture || null,
       proposalStartDate: proposal.startDate,
       proposalEndDate: proposal.endDate,
@@ -472,16 +514,28 @@ exports.getJobApplications = async (jobId) => {
 
     return {
       success: true,
+      message: 'Job applications fetched successfully',
       data: {
-        totalProposals: proposals.length,
-        customerName: job.customer ? `${job.customer.firstName} ${job.customer.lastName}` : null,
+        totalProposals: count,
+        customerName: job.customer
+          ? `${job.customer.firstName} ${job.customer.lastName}`
+          : null,
         jobCreatedAt: job.createdAt,
-        applications
+        jobTitle: job.title,
+        ...formatPaginatedResponse(
+          { rows: applications, count },
+          page,
+          limit
+        )
       }
     };
   } catch (error) {
     logger.error(`Error fetching job applications: ${error.message}`);
-    return { success: false, message: 'Database error', errors: [error.message] };
+    return {
+      success: false,
+      message: 'Database error',
+      errors: [error.message]
+    };
   }
 };
 
