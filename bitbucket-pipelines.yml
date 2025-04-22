@@ -15,7 +15,7 @@ pipelines:
             # OPTIONAL: Add known_hosts if you want strict SSH
             # - ssh-keyscan -H your-server-ip >> ~/.ssh/known_hosts
 
-            - ssh -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
+            - ssh -v -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
                 cd /root/myusta-backend &&
                 git pull origin dev &&
                 npm install &&
