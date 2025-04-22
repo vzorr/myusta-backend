@@ -13,9 +13,10 @@ pipelines:
             - chmod 600 key.pem
 
             - echo "🔧 Connecting to server and running deployment commands..."
-            - ssh -v -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
+            - |
+              ssh -v -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
                 cd /root/myusta-backend &&
                 git pull origin dev &&
                 npm install &&
                 pm2 restart usta-app || pm2 start src/index.js --name usta-app &&
-                echo '\''✅ Deployment successful!'\'
+                echo "✅ Deployment successful!"
