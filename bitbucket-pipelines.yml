@@ -6,14 +6,14 @@ pipelines:
       - step:
           name: 🚀 Deploy USTA App to Ubuntu 22.04 Server
           script:
-            - apt-get update && apt-get install -y openssh-client
-            - mkdir -p ~/.ssh
+            - sudo apt-get update && apt-get install -y openssh-client
+            - sudo mkdir -p ~/.ssh
             - echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-            - chmod 600 ~/.ssh/id_rsa
-            - ssh-keyscan -H 47.254.134.96 >> ~/.ssh/known_hosts
-            - ssh root@47.254.134.96 '
-                cd /root/myusta-backend &&
-                git pull origin dev &&
-                npm install &&
-                pm2 restart usta-app || pm2 start src/index.js --name usta-app
+            - sudo chmod 600 ~/.ssh/id_rsa
+            - sudo ssh-keyscan -H 47.254.134.96 >> ~/.ssh/known_hosts
+            - sudo ssh root@47.254.134.96 '
+                sudo cd /root/myusta-backend &&
+                sudo git pull origin dev &&
+                sudo npm install &&
+                sudo pm2 restart usta-app || pm2 start src/index.js --name usta-app
               '
