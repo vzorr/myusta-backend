@@ -475,7 +475,7 @@ exports.getJobApplications = async (jobId, query) => {
         as: 'customer',
         attributes: ['id', 'firstName', 'lastName']
       }],
-      attributes: ['id', 'createdAt']
+      attributes: ['id', 'createdAt', 'title']
     });
 
     if (!job) {
@@ -521,6 +521,7 @@ exports.getJobApplications = async (jobId, query) => {
           ? `${job.customer.firstName} ${job.customer.lastName}`
           : null,
         jobCreatedAt: job.createdAt,
+        jobTitle: job.title,
         ...formatPaginatedResponse(
           { rows: applications, count },
           page,
