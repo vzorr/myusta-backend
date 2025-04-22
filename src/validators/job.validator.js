@@ -20,6 +20,10 @@ const locationSchema = Joi.object({
     'number.max': 'Longitude must be between -180 and 180',
     'any.required': 'Longitude is required',
   }),
+  description: Joi.string().max(1000).optional().messages({
+    'string.base': 'Description must be a string',
+    'string.max': 'Description cannot exceed 1000 characters',
+  }),
 });
 
 const createJobSchema = Joi.object({

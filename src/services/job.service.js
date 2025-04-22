@@ -33,7 +33,8 @@ exports.createJob = async (jobData) => {
       whoseLocation: 'job',
       address: jobData.location.address,
       latitude: jobData.location.latitude,
-      longitude: jobData.location.longitude
+      longitude: jobData.location.longitude,
+      description: jobData.location.description
     });
 
     // Create job with image URLs and location ID
@@ -145,7 +146,7 @@ exports.getRecommendedJobs = async (ustaId) => {
           include: [{
             model: Location,
             as: 'location',
-            attributes: ['latitude', 'longitude', 'maxDistance']
+            attributes: ['latitude', 'longitude', 'maxDistance', 'description']
           }]
         },
         {
@@ -217,7 +218,7 @@ exports.getRecommendedJobs = async (ustaId) => {
           model: Location,
           as: 'jobLocation',
           required: true,
-          attributes: ['latitude', 'longitude', 'address']
+          attributes: ['latitude', 'longitude', 'address', 'description']
         }
       ],
       order: [['createdAt', 'DESC']],
