@@ -15,4 +15,7 @@ router.post('/usta-creation', authenticate, authorized(ROLES.USTA), validate(ust
 router.get('/usta-profile/:id', authenticate, authorized(ROLES.CUSTOMER), accountController.ustaProfile);
 router.get('/customer-profile/:id', authenticate, authorized(ROLES.USTA), accountController.customerProfile);
 
+// Portfolio details of an usta
+router.get('/portfolio/:id', authenticate, authorized(ROLES.CUSTOMER), accountController.getPortfolioDetails);
+
 module.exports = router;
