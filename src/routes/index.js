@@ -5,11 +5,13 @@ const authRoutes = require('./auth.routes');
 const accountRoutes = require('./account.routes');
 const generalRoutes = require('./general.routes');
 const jobRoutes = require('./job.routes');
+const contractRoutes = require('./contract.routes');
 
 router.use('/auth', authRoutes)
 router.use('/general', generalRoutes);
 router.use('/users', userRoutes);
 router.use('/account', accountRoutes);
 router.use('/jobs', jobRoutes);
+router.use('/contracts', contractRoutes);
 
 module.exports = router;
