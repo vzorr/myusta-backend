@@ -1,3 +1,4 @@
+const { not } = require('joi');
 const { User, ProfessionalDetail, Portfolio, Location, Availability } = require('../models');
 const { logger } = require('../utils/logger');
 
@@ -58,11 +59,11 @@ const getUstaProfile = async (userId) => {
             }
           }) : [],
         } : {},
-
         availability: usta.availability ? usta.availability : {},
-
-        
-
+        termsAndConditions: usta.termsAndConditions,
+        notificationViaEmail: usta.notificationViaEmail,
+        notificationViaSms: usta.notificationViaSms,
+        notificationViaApp: usta.notificationViaApp
       }
     };
 
@@ -79,7 +80,17 @@ const getUstaProfile = async (userId) => {
 
 const getCustomerProfile = async (userId) => {
   try {
-    const customer = await User.findOne({ where: { id: userId, role: 'customer' } });
+    const customer = await User.findOne({ 
+      where: { id: userId, role: 'customer' },
+      attributes: [ 'id', 'firstName', 'lastName', 'phone', 'profilePicture', 'customerPreferences', 'notificationViaEmail', 'notificationViaSms', 'notificationViaApp', 'termsAndConditions' ],
+      include: [
+        {
+          model: Location,
+          as: 'locations',
+          where: { whoseLocation: 'customer' },
+        }
+      ],
+    });
     if (!customer) {
       return { success: false, message: 'Customer not found' };
     }

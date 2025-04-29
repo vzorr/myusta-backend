@@ -78,7 +78,7 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
-    termAndCondition: {
+    termsAndConditions: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },

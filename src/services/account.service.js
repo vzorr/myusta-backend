@@ -50,6 +50,7 @@ exports.customerAccountCreation = async (userId, data) => {
       notificationViaEmail,
       notificationViaSms,
       notificationViaApp,
+      termsAndConditions,
       status: "active",
     });
 
@@ -84,6 +85,7 @@ exports.customerAccountCreation = async (userId, data) => {
       notificationViaEmail,
       notificationViaSms,
       notificationViaApp,
+      termsAndConditions,
     };
 
     return {
@@ -216,6 +218,7 @@ exports.ustaAccountCreation = async (userId, data) => {
         notificationViaEmail,
         notificationViaSms,
         notificationViaApp,
+        termsAndConditions,
       },
     };
   } catch (error) {
