@@ -139,3 +139,19 @@ exports.customerProfile = async (req, res) => {
     return errorResponse(res, 'Error fetching customer profile', [error.message], 500);
   }
 };
+
+exports.getPortfolioDetails = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await accountService.getPortfolioDetails(id);
+
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, result.statusCode || 404);
+    }
+
+    return successResponse(res, result.message, result.data);
+  } catch (error) {
+    logger.error(`Unexpected error in getPortfolioDetails: ${error.message}`);
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};

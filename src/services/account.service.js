@@ -233,7 +233,6 @@ exports.ustaAccountCreation = async (userId, data) => {
 
 exports.getUstaProfile = async (currentCustmerId, ustaId) => {
   try {
-
     const usta = await User.findOne({
       where: { id: ustaId },
       include: [
@@ -244,14 +243,19 @@ exports.getUstaProfile = async (currentCustmerId, ustaId) => {
         {
           model: Portfolio,
           as: 'portfolios'
+        },
+        {
+          model: Location,
+          as: 'locations'
         }
       ],
-    })
+    });
+
     if (!usta) {
       return {
         success: false,
         message: 'Usta not found'
-      }
+      };
     }
 
     return {
@@ -261,28 +265,25 @@ exports.getUstaProfile = async (currentCustmerId, ustaId) => {
         id: usta.id,
         firstName: usta.firstName,
         lastName: usta.lastName,
+        email: usta.email,
         phone: usta.phone,
         profilePicture: usta.profilePicture,
-        professionalDetail: usta.professionalDetail ? {
-          id: usta.professionalDetail.id,
-          nipt: usta.professionalDetail.nipt,
-          experiences: usta.professionalDetail.experiences,
-        } : {},
-        portfolios: usta.portfolios ? usta.portfolios.map(item => {
-          return {
-            id: item.id,
-            title: item.title,
-            description: item.description,
-            category: item.category,
-            media: item.media
-          }
-        }) : [],
-
+        professionalDetail: usta.professionalDetail,
+        portfolios: usta.portfolios,
+        locations: usta.locations
+          ? usta.locations.map(loc => ({
+              id: loc.id,
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+              address: loc.address,
+              maxDistance: loc.maxDistance,
+              description: loc.description
+            }))
+          : []
       }
     };
-  }
-  catch (error) {
-    logError(`Error in fetching usta profile: ${error.message}`);
+  } catch (error) {
+    logError(`Error in usta account creation/update: ${error.message}`);
     return {
       success: false,
       message: 'Failed to fetch usta profile',
@@ -290,6 +291,7 @@ exports.getUstaProfile = async (currentCustmerId, ustaId) => {
     };
   }
 };
+
 exports.getCustomerProfile = async (userId, customerId) => {
   try {
     const customer = await User.findOne({
@@ -339,6 +341,49 @@ exports.getCustomerProfile = async (userId, customerId) => {
       success: false,
       message: 'Failed to fetch customer profile',
       errors: [error.message],
+    };
+  }
+};
+
+exports.getPortfolioDetails = async (portfolioId) => {
+  try {
+    const portfolio = await Portfolio.findByPk(portfolioId, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'firstName', 'lastName']
+        }
+      ]
+    });
+
+    if (!portfolio) {
+      return {
+        success: false,
+        message: 'Portfolio not found',
+        statusCode: 404
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Portfolio details fetched successfully',
+      data: {
+        id: portfolio.id,
+        title: portfolio.title,
+        createdAt: portfolio.createdAt,
+        description: portfolio.description,
+        category: portfolio.category,
+        media: portfolio.media,
+        usta: portfolio.user
+      }
+    };
+  } catch (error) {
+    logError(`Error fetching portfolio details: ${error.message}`);
+    return {
+      success: false,
+      message: 'Failed to fetch portfolio details',
+      errors: [error.message]
     };
   }
 };

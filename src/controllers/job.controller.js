@@ -45,7 +45,7 @@ exports.getJobById = async (req, res, next) => {
 exports.getUserJobs = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const result = await jobService.getUserJobs(userId);
+    const result = await jobService.getUserJobs(userId, req.query);
 
     if (!result.success) {
       logger.warn(`Failed to fetch jobs for user ID: ${userId}`);
@@ -68,18 +68,17 @@ exports.getUstaJobs = async (req, res, next) => {
 
     switch (filter) {
       case 'recommended':
-        result = await jobService.getRecommendedJobs(req.user.id);
+        result = await jobService.getRecommendedJobs(req.user.id, req.query);
         break;
       case 'most_recent':
-        result = await jobService.getMostRecentJobs(req.user.id);
+        result = await jobService.getMostRecentJobs(req.user.id, req.query);
         break;
       case 'saved':
-        result = await jobService.getSavedJobs(req.user.id);
+        result = await jobService.getSavedJobs(req.user.id, req.query);
         break;
-
       default:
         logger.warn(`Invalid filter type: ${filter}`);
-        return errorResponse(res, 'Invalid filter type. Must be either "recommended" or "most_recent"', [], 400);
+        return errorResponse(res, 'Invalid filter type. Must be either "recommended", "most_recent", or "saved"', [], 400);
     }
 
     if (!result.success) {
@@ -135,7 +134,8 @@ exports.createJobProposal = async (req, res, next) => {
 exports.getUstaAppliedJobs = async (req, res, next) => {
   try {
     const ustaId = req.user.id;
-    const result = await jobService.getUstaAppliedJobs(ustaId);
+    const queryParams = req.query;
+    const result = await jobService.getUstaAppliedJobs(ustaId, queryParams);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 500);
@@ -153,7 +153,8 @@ exports.getUstaAppliedJobs = async (req, res, next) => {
 exports.getJobApplications = async (req, res, next) => {
   try {
     const jobId = req.params.id;
-    const result = await jobService.getJobApplications(jobId);
+    const queryParams = req.query;
+    const result = await jobService.getJobApplications(jobId, queryParams);
 
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, result.statusCode || 500);
