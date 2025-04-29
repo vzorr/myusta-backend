@@ -23,6 +23,7 @@ const getMetaData = async () => {
       categories: CATEGORY,
       paymentMethods: PAYMENT_METHODS ? Object.values(PAYMENT_METHODS) : [],
       jobStatus: JOB_STATUS ? Object.values(JOB_STATUS) : [],
+      contractStatus: CONTRACT_STATUS ? Object.values(CONTRACT_STATUS) : [],
       percentage: PERCENTAGE
     };
 
