@@ -75,12 +75,20 @@ const PERCENTAGE = {
   jobProposal : 10
 }
 
-// In src/utils/constant.js
+// JobProposal.js
 const WHO_WILL_PROVIDE_MATERIAL = {
   CUSTOMER: 'customer',
   USTA: 'usta',
   PARTIAL: 'partial',
 };
+
+// contract.js
+const CONTRACT_STATUS = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+};
+
 
 // Export dono cheezein
 module.exports = {
@@ -97,5 +105,6 @@ module.exports = {
   PROPOSAL_STATUS,
   MILESTONE_STATUS,
   PERCENTAGE,
-  WHO_WILL_PROVIDE_MATERIAL
+  WHO_WILL_PROVIDE_MATERIAL,
+  CONTRACT_STATUS
 };

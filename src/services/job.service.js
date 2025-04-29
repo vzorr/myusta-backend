@@ -1,5 +1,5 @@
 // src/services/job.service.js
-const { Job, User, Location, SavedJob, Availability, ProfessionalDetail, JobProposal, Milestone } = require('../models');
+const { Job, User, Location, SavedJob, Availability, ProfessionalDetail, JobProposal, Milestone, Contract } = require('../models');
 const { logger } = require('../utils/logger');
 const { uploadJobImages } = require('../utils/imageUtils');
 const { Op } = require('sequelize');
@@ -560,6 +560,11 @@ exports.getJobProposalDetails = async (proposalId) => {
             }
           ],
           attributes: ['id', 'title', 'createdAt', 'status']
+        },
+        {
+          model: Contract, 
+          as: 'contract', 
+          attributes: ['id']
         }
       ]
     });
@@ -580,10 +585,12 @@ exports.getJobProposalDetails = async (proposalId) => {
         totalCost: proposal.totalCost,
         serviceFee: proposal.serviceFee,
         finalPayment: proposal.finalPayment,
+        materials: proposal.materials || [],
         createdAt: proposal.createdAt,
         usta: proposal.usta,
         job: proposal.job,
-        customer: proposal.job?.customer
+        customer: proposal.job?.customer,
+        contractId: proposal.contract ? proposal.contract.id : null
       }
     };
   } catch (error) {
