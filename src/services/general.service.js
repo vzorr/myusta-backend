@@ -1,6 +1,6 @@
 const { User, Category, Verification } = require('../models');
 const { logger } = require('../utils/logger');
-const { ROLES, STATUS, AUTH_PROVIDERS, PREFERRED_JOB_TYPES, CATEGORY, PAYMENT_METHODS, JOB_STATUS, PERCENTAGE } = require('../utils/constant');
+const { ROLES, STATUS, AUTH_PROVIDERS, PREFERRED_JOB_TYPES, CATEGORY, PAYMENT_METHODS, JOB_STATUS, PERCENTAGE, CONTRACT_STATUS } = require('../utils/constant');
 
 
 const getAllCategories = async () => {
