@@ -31,7 +31,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 
 // Health Check Route
-app.get('/', (req, res) => res.send('OK - Server is running!'));
+app.get('/', (req, res) => res.send('OK - Server is running with pipeline!'));
 
 // Routes
 app.use('/api', routes);
