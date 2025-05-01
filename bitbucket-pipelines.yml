@@ -4,12 +4,21 @@ pipelines:
   branches:
     dev:
       - step:
-          name: Deploy to dev server
+          name: 🚀 Deploy to Dev Server with PM2
           script:
-            - echo "Deploying to server..."
+            - echo "🔐 Connecting to server..."
             - >
               ssh -o StrictHostKeyChecking=no root@47.254.134.96 "
+              echo '📁 Step 1: Changing directory...' &&
               cd myusta-backend &&
+
+              echo '📥 Step 2: Pulling latest code...' &&
               git pull origin dev &&
-              pkill -f nodemon || true &&
-              nohup npx nodemon index.js > output.log 2>&1 &"
+
+              echo '📦 Step 3: Installing dependencies...' &&
+              npm install &&
+
+              echo '🚀 Step 4: Restarting or starting PM2 process...' &&
+              pm2 restart usta-app || pm2 start src/index.js --name usta-app &&
+
+              echo '✅ Step 5: Deployment successful!'"
