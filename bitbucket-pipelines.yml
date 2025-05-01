@@ -11,4 +11,4 @@ pipelines:
                 cd myusta-backend
                 git pull origin dev
                 pm2 restart all || node index.js &
-              EOF
+EOF
