@@ -4,10 +4,9 @@ pipelines:
   branches:
     dev:
       - step:
-          name: Deploy to GoDaddy server
+          name: Deploy to dev server
           script:
-            - echo "Starting deployment..."
-            - chmod 600 bitbucket_deploy_key
+            - echo "Deploying to server..."
             - ssh -o StrictHostKeyChecking=no root@47.254.134.96 << 'EOF'
                 cd myusta-backend
                 git pull origin dev
