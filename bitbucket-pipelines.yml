@@ -7,8 +7,9 @@ pipelines:
           name: Deploy to dev server
           script:
             - echo "Deploying to server..."
-            - ssh -o StrictHostKeyChecking=no root@47.254.134.96 << 'EOF'
-                cd myusta-backend
-                git pull origin dev
-                pm2 restart all || node index.js &
-EOF
+            - >
+              ssh -o StrictHostKeyChecking=no root@47.254.134.96 << 'EOF'
+              cd myusta-backend
+              git pull origin dev
+              pm2 restart all || node index.js &
+              EOF
