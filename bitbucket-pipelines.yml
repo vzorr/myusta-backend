@@ -4,27 +4,12 @@ pipelines:
   branches:
     dev:
       - step:
-          name: 🚀 Deploy to Server via SSH (Step-by-Step)
-          caches:
-            - node
+          name: Deploy to GoDaddy server
           script:
-            - echo "🔐 Setting up SSH key..."
-            - echo "$SSH_PRIVATE_KEY" > key.pem
-            - chmod 600 key.pem
-
-            - echo "🔧 Connecting to server and running step-by-step deployment..."
-            - |
-              ssh -v -o StrictHostKeyChecking=no -i key.pem root@47.254.134.96 '
-                echo "📁 Step 1: Changing directory..." &&
-                cd /root/myusta-backend &&
-
-                echo "📥 Step 2: Pulling latest code..." &&
-                git pull origin dev &&
-
-                echo "📦 Step 3: Installing dependencies..." &&
-                npm install &&
-
-                echo "🚀 Step 4: Restarting or starting PM2 process..." &&
-                pm2 restart usta-app || pm2 start src/index.js --name usta-app &&
-
-                echo "✅ Step 5: Deployment successful!"
+            - echo "Starting deployment..."
+            - chmod 600 bitbucket_deploy_key
+            - ssh -o StrictHostKeyChecking=no root@47.254.134.96 << 'EOF'
+                cd myusta-backend
+                git pull origin dev
+                pm2 restart all || node index.js &
+              EOF
