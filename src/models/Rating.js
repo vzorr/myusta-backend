@@ -1,4 +1,4 @@
-// Enhancements for src/models/Rating.js
+// Updated src/models/Rating.js - Fixed tableName case
 module.exports = (sequelize, DataTypes) => {
     const Rating = sequelize.define('Rating', {
       id: {
@@ -108,6 +108,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false
       }
+    }, {
+      tableName: 'ratings' // Explicitly set the table name to match migration
     });
     
     return Rating;

@@ -1,4 +1,4 @@
-// Enhancements for src/models/Invitation.js
+// Updated src/models/Invitation.js - Fixed tableName case
 module.exports = (sequelize, DataTypes) => {
     const Invitation = sequelize.define('Invitation', {
       id: {
@@ -43,55 +43,45 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 'pending'
       },
       
-      // Additional fields for enhanced functionality:
-      
-      // To track when the invitation was viewed
       viewedAt: {
         type: DataTypes.DATE,
         allowNull: true
       },
       
-      // Response from the Usta (if they reject with a reason)
       responseMessage: {
         type: DataTypes.TEXT,
         allowNull: true
       },
       
-      // Alternative proposed time (if Usta can't make the preferred time)
       alternativeTime: {
         type: DataTypes.DATE,
         allowNull: true
       },
       
-      // For follow-up invitations
       previousInvitationId: {
         type: DataTypes.UUID,
         allowNull: true,
         references: {
-          model: 'Invitations',
+          model: 'invitations', // Notice this is lowercase to match migration
           key: 'id'
         }
       },
       
-      // Expiration date for the invitation
       expiresAt: {
         type: DataTypes.DATE,
         allowNull: true
       },
       
-      // Type of invitation (direct, job-based, etc.)
       invitationType: {
         type: DataTypes.ENUM('direct', 'job-based', 'follow-up'),
         defaultValue: 'direct'
       },
       
-      // Service details if no job is associated
       serviceDetails: {
         type: DataTypes.JSONB,
         allowNull: true
       },
       
-      // Location for the service
       locationId: {
         type: DataTypes.UUID,
         allowNull: true,
@@ -101,7 +91,6 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       
-      // Budget information
       budgetMin: {
         type: DataTypes.FLOAT,
         allowNull: true
@@ -111,6 +100,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
         allowNull: true
       }
+    }, {
+      tableName: 'invitations' // Explicitly set the table name to match migration
     });
     
     return Invitation;

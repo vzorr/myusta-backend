@@ -1,3 +1,4 @@
+// Updated src/models/index.js - Fixed associations
 'use strict';
 
 const fs = require('fs');
@@ -29,8 +30,8 @@ const {
   JobProposal,
   Milestone,
   Contract,
-  Rating,        // Add this line
-  Invitation     // Add this line
+  Rating,
+  Invitation
 } = db;
 
 // User ↔ Job
@@ -98,8 +99,6 @@ Contract.belongsTo(JobProposal, { foreignKey: 'jobProposalId', as: 'JobProposal'
 
 JobProposal.hasOne(Contract, { foreignKey: 'jobProposalId', as: 'contract' });
 
-
-
 // Rating associations
 User.hasMany(Rating, { foreignKey: 'ustaId', as: 'receivedRatings' });
 Rating.belongsTo(User, { foreignKey: 'ustaId', as: 'usta' });
@@ -127,8 +126,6 @@ Invitation.belongsTo(Location, { foreignKey: 'locationId', as: 'location' });
 // Self-reference for previous invitation (if you included previousInvitationId)
 Invitation.belongsTo(Invitation, { foreignKey: 'previousInvitationId', as: 'previousInvitation' });
 Invitation.hasMany(Invitation, { foreignKey: 'previousInvitationId', as: 'followUpInvitations' });
-
-
 
 // Sequelize setup
 db.sequelize = sequelize;
