@@ -1,6 +1,7 @@
-// src/controllers/usta.controller.js
+// src/controllers/usta.controller.js (Updated)
 const ustaService = require('../services/usta.service');
 const { successResponse, errorResponse } = require('../utils/response');
+const { logger } = require('../utils/logger');
 
 // Search and filter Ustas
 exports.searchUstas = async (req, res, next) => {
@@ -23,6 +24,7 @@ exports.searchUstas = async (req, res, next) => {
 
     return successResponse(res, 'Ustas retrieved successfully', result.data);
   } catch (error) {
+    logger.error(`Error in searchUstas: ${error.message}`);
     return next({ statusCode: 500, message: 'Internal server error' });
   }
 };
@@ -40,25 +42,69 @@ exports.getTopUstas = async (req, res, next) => {
     
     return successResponse(res, `${type} Ustas retrieved successfully`, result.data);
   } catch (error) {
+    logger.error(`Error in getTopUstas: ${error.message}`);
     return next({ statusCode: 500, message: 'Internal server error' });
   }
 };
 
-// Send invitation to Usta
-exports.inviteUsta = async (req, res, next) => {
+// Get pending invitations for a Usta
+exports.getUstaInvitations = async (req, res, next) => {
   try {
-    const ustaId = req.params.id;
-    const customerId = req.user.id;
-    const { message, jobId, time } = req.body;
+    const ustaId = req.user.id;
+    const { status } = req.query;
     
-    const result = await ustaService.inviteUsta(ustaId, customerId, { message, jobId, time });
+    const result = await ustaService.getUstaInvitations(ustaId, status);
     
     if (!result.success) {
       return errorResponse(res, result.message, result.errors, 400);
     }
     
-    return successResponse(res, 'Invitation sent successfully', result.data);
+    return successResponse(res, 'Invitations retrieved successfully', result.data);
   } catch (error) {
+    logger.error(`Error in getUstaInvitations: ${error.message}`);
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};
+
+// Respond to an invitation (accept/reject)
+exports.respondToInvitation = async (req, res, next) => {
+  try {
+    const invitationId = req.params.id;
+    const ustaId = req.user.id;
+    const { status, message, alternativeTime } = req.body;
+    
+    const result = await ustaService.respondToInvitation(invitationId, ustaId, {
+      status,
+      message,
+      alternativeTime
+    });
+    
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, result.statusCode || 400);
+    }
+    
+    return successResponse(res, `Invitation ${status}`, result.data);
+  } catch (error) {
+    logger.error(`Error in respondToInvitation: ${error.message}`);
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};
+
+// Get Usta profile (accessible by both customers and ustas)
+exports.getUstaProfile = async (req, res, next) => {
+  try {
+    const ustaId = req.params.id;
+    const userId = req.user.id;
+    
+    const result = await ustaService.getUstaProfile(ustaId, userId);
+    
+    if (!result.success) {
+      return errorResponse(res, result.message, result.errors, result.statusCode || 404);
+    }
+    
+    return successResponse(res, 'Usta profile fetched successfully', result.data);
+  } catch (error) {
+    logger.error(`Error in getUstaProfile: ${error.message}`);
     return next({ statusCode: 500, message: 'Internal server error' });
   }
 };

@@ -1,0 +1,779 @@
+openapi: 3.0.3
+info:
+  title: MyUsta API
+  description: API documentation for the MyUsta platform - a service marketplace connecting customers with service providers (Ustas)
+  version: 1.0.0
+  contact:
+    name: MyUsta Support
+    email: support@myusta.com
+    url: https://myusta.com/support
+  license:
+    name: Proprietary
+    url: https://myusta.com/terms
+
+servers:
+  - url: https://api.myusta.com/api/v1
+    description: Production server
+  - url: https://staging-api.myusta.com/api/v1
+    description: Staging server
+  - url: http://localhost:3000/api/v1
+    description: Development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained after authentication
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Bad request
+        errors:
+          type: array
+          items:
+            type: string
+          example: ["Email is required", "Password is too short"]
+
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Operation successful
+        result:
+          type: object
+          description: Response data structure varies by endpoint
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "f58d9b40-8e90-4c9d-8607-7b0de82c3fc0"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        phone:
+          type: string
+          example: "1234567890"
+        profilePicture:
+          type: string
+          format: uri
+          example: "https://myusta-images-videos.s3.amazonaws.com/profile/user-id/image.jpg"
+        role:
+          type: string
+          enum: [customer, usta]
+          example: "usta"
+        status:
+          type: string
+          enum: [active, inprogress, inactive, blocked]
+          example: "active"
+        averageRating:
+          type: number
+          format: float
+          example: 4.8
+        totalRatings:
+          type: integer
+          example: 42
+        totalHires:
+          type: integer
+          example: 15
+        totalViews:
+          type: integer
+          example: 230
+        isVerified:
+          type: boolean
+          example: true
+        isFeatured:
+          type: boolean
+          example: false
+
+    UstaProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "f58d9b40-8e90-4c9d-8607-7b0de82c3fc0"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        profilePicture:
+          type: string
+          format: uri
+          example: "https://myusta-images-videos.s3.amazonaws.com/profile/user-id/image.jpg"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        phone:
+          type: string
+          example: "1234567890"
+        averageRating:
+          type: number
+          format: float
+          example: 4.8
+        totalRatings:
+          type: integer
+          example: 42
+        totalHires:
+          type: integer
+          example: 15
+        totalViews:
+          type: integer
+          example: 230
+        isVerified:
+          type: boolean
+          example: true
+        isFeatured:
+          type: boolean
+          example: false
+        professionalDetail:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6"
+            nipt:
+              type: string
+              example: "J12345678X"
+            experiences:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    example: "plumber"
+                  yearsOfExp:
+                    type: integer
+                    example: 5
+        portfolios:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                example: "b2c3d4e5-f6g7-h8i9-j0k1-l2m3n4o5p6q7"
+              title:
+                type: string
+                example: "Bathroom Renovation Project"
+              description:
+                type: string
+                example: "Complete renovation of a high-end bathroom including new fixtures, tiling, and heated flooring."
+              category:
+                type: string
+                example: "plumber"
+              media:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [image, video]
+                      example: "image"
+                    url:
+                      type: string
+                      format: uri
+                      example: "https://myusta-images-videos.s3.amazonaws.com/portfolio/user-id/bathroom-renovation.jpg"
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                example: "c3d4e5f6-g7h8-i9j0-k1l2-m3n4o5p6q7r8"
+              latitude:
+                type: number
+                format: float
+                example: 37.7749
+              longitude:
+                type: number
+                format: float
+                example: -122.4194
+              address:
+                type: string
+                example: "123 Main St, San Francisco, CA 94103"
+              maxDistance:
+                type: integer
+                example: 50
+
+    Invitation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "d4e5f6g7-h8i9-j0k1-l2m3-n4o5p6q7r8s9"
+        ustaId:
+          type: string
+          format: uuid
+          example: "f58d9b40-8e90-4c9d-8607-7b0de82c3fc0"
+        customerId:
+          type: string
+          format: uuid
+          example: "e5f6g7h8-i9j0-k1l2-m3n4-o5p6q7r8s9t0"
+        jobId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "f6g7h8i9-j0k1-l2m3-n4o5-p6q7r8s9t0u1"
+        message:
+          type: string
+          nullable: true
+          example: "I need help with my bathroom renovation. Are you available next week?"
+        preferredTime:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-06-01T14:00:00Z"
+        status:
+          type: string
+          enum: [pending, accepted, rejected, expired, canceled]
+          example: "pending"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-05-20T10:30:45Z"
+        viewedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-05-20T11:15:20Z"
+        usta:
+          $ref: '#/components/schemas/User'
+        customer:
+          $ref: '#/components/schemas/User'
+        
+    InvitationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [accepted, rejected]
+          example: "accepted"
+        message:
+          type: string
+          nullable: true
+          example: "I'm available at your preferred time. Looking forward to discussing your project."
+        alternativeTime:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-06-02T10:00:00Z"
+
+    InvitationRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          example: "I need help with my bathroom renovation. Are you available next week?"
+        jobId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "f6g7h8i9-j0k1-l2m3-n4o5-p6q7r8s9t0u1"
+        time:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-06-01T14:00:00Z"
+      example:
+        message: "I need help with my bathroom renovation. Are you available next week?"
+        time: "2025-06-01T14:00:00Z"
+
+  parameters:
+    pageParam:
+      name: page
+      in: query
+      description: Page number for pagination
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    limitParam:
+      name: limit
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    statusParam:
+      name: status
+      in: query
+      description: Filter by status
+      schema:
+        type: string
+        enum: [pending, accepted, rejected, expired, canceled]
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            code: 401
+            message: Unauthorized
+            errors: ["Invalid or expired token"]
+            
+    ForbiddenError:
+      description: Not allowed to access the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            code: 403
+            message: Access denied
+            errors: ["Unauthorized role"]
+            
+    NotFoundError:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            code: 404
+            message: Not found
+            errors: ["Resource not found"]
+            
+    BadRequestError:
+      description: The request contains invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            code: 400
+            message: Bad request
+            errors: ["Invalid parameters"]
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            code: 500
+            message: Internal server error
+            errors: ["An unexpected error occurred"]
+
+security:
+  - bearerAuth: []
+
+# API Paths
+paths:
+  #==============================================================================
+  # USTA ROUTES
+  #==============================================================================
+  /ustas:
+    get:
+      tags:
+        - Ustas
+      summary: Search and filter Ustas
+      description: Returns a list of Ustas based on search criteria and filters
+      security: []  # Public endpoint, no authentication required
+      parameters:
+        - name: search
+          in: query
+          description: Search term for Usta name, description, or skills
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Filter by service category
+          schema:
+            type: string
+            enum: [plumber, electrician, carpenter, cleaner, painter]
+        - name: latitude
+          in: query
+          description: Latitude for location-based search
+          schema:
+            type: number
+            format: float
+        - name: longitude
+          in: query
+          description: Longitude for location-based search
+          schema:
+            type: number
+            format: float
+        - name: maxDistance
+          in: query
+          description: Maximum distance in kilometers
+          schema:
+            type: integer
+            default: 50
+        - name: minRating
+          in: query
+          description: Minimum rating (1-5)
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: A list of Ustas matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Ustas retrieved successfully"
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      totalCount:
+                        type: integer
+                        example: 120
+                      totalPages:
+                        type: integer
+                        example: 12
+                      page:
+                        type: integer
+                        example: 1
+                      limit:
+                        type: integer
+                        example: 10
+                      hasNextPage:
+                        type: boolean
+                        example: true
+                      hasPreviousPage:
+                        type: boolean
+                        example: false
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /ustas/top:
+    get:
+      tags:
+        - Ustas
+      summary: Get top-rated or popular Ustas
+      description: Returns a list of top-rated or popular Ustas
+      security: []  # Public endpoint, no authentication required
+      parameters:
+        - name: type
+          in: query
+          description: Type of top Ustas to retrieve
+          schema:
+            type: string
+            enum: [top-rated, popular]
+            default: top-rated
+        - name: category
+          in: query
+          description: Filter by service category
+          schema:
+            type: string
+            enum: [plumber, electrician, carpenter, cleaner, painter]
+        - name: limit
+          in: query
+          description: Number of Ustas to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: A list of top Ustas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "top-rated Ustas retrieved successfully"
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /ustas/{id}/profile:
+    get:
+      tags:
+        - Ustas
+      summary: Get Usta profile by ID
+      description: Returns the complete profile of a specific Usta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Usta
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Usta profile details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Usta profile fetched successfully"
+                  result:
+                    $ref: '#/components/schemas/UstaProfile'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /ustas/invitations:
+    get:
+      tags:
+        - Ustas
+      summary: Get invitations for a Usta
+      description: Returns all invitations received by the authenticated Usta
+      parameters:
+        - $ref: '#/components/parameters/statusParam'
+      responses:
+        '200':
+          description: List of invitations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Usta invitations retrieved successfully"
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /ustas/invitations/{id}/respond:
+    patch:
+      tags:
+        - Ustas
+      summary: Respond to an invitation
+      description: Accept or reject an invitation received by the Usta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the invitation
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationResponse'
+      responses:
+        '200':
+          description: Invitation response processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Invitation accepted"
+                  result:
+                    $ref: '#/components/schemas/Invitation'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  #==============================================================================
+  # CUSTOMER ROUTES
+  #==============================================================================
+  /customers/invite-usta/{id}:
+    post:
+      tags:
+        - Customers
+      summary: Send invitation to Usta
+      description: Allows a customer to send an invitation to a Usta for a job or direct service
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Usta to invite
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationRequest'
+      responses:
+        '200':
+          description: Invitation sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Invitation sent successfully"
+                  result:
+                    $ref: '#/components/schemas/Invitation'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /customers/invitations:
+    get:
+      tags:
+        - Customers
+      summary: Get invitations sent by customer
+      description: Returns all invitations sent by the authenticated customer
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/statusParam'
+      responses:
+        '200':
+          description: List of invitations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Customer invitations fetched successfully"
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Invitation'
+                      totalCount:
+                        type: integer
+                        example: 45
+                      totalPages:
+                        type: integer
+                        example: 5
+                      page:
+                        type: integer
+                        example: 1
+                      limit:
+                        type: integer
+                        example: 10
+                      hasNextPage:
+                        type: boolean
+                        example: true
+                      hasPreviousPage:
+                        type: boolean
+                        example: false
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
