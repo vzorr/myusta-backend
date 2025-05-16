@@ -142,20 +142,22 @@ app.use(morgan((tokens, req, res) => {
 
 // Middleware
 try {
-  // Enhanced CORS configuration for better external access
+
+
+  // Corrected CORS configuration
   const corsOptions = {
-    origin: '*', // Allow all origins
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: true,  // This reflects the request origin
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
     preflightContinue: false,
     optionsSuccessStatus: 204,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
   };
+
+  // Apply CORS middleware
   app.use(cors(corsOptions));
   console.log('[INFO] CORS middleware initialized with access from all origins');
-  
-  // Handle preflight requests explicitly
-  app.options('*', cors(corsOptions));
+
   
   app.use(express.json({ limit: '50mb' }));
   console.log('[INFO] JSON body parser initialized');
