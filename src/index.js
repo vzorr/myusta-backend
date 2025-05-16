@@ -7,6 +7,7 @@ const routes = require('./routes');
 const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
 const { logger, logHttp, logServerStart } = require('./utils/logger');
 const { BASE_URL } = require('./config/index');
+const setupSwagger = require('./swagger');
 
 dotenv.config();
 
@@ -29,6 +30,8 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Setup Swagger documentation
+setupSwagger(app);
 
 // Health Check Route
 app.get('/', (req, res) => res.send('OK - Server is running alright!'));

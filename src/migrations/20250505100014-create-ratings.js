@@ -1,4 +1,4 @@
-// src/migrations/YYYYMMDDHHMMSS-create-ratings.js
+// src/migrations/20250505100014-create-ratings.js
 'use strict';
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true
       },
       usta_id: {
-        type: Sequelize.UUID,
+        type: Sequelize.UUID,  // Ensuring this is UUID to match users.id
         allowNull: false,
         references: {
           model: 'users',
@@ -20,7 +20,7 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       customer_id: {
-        type: Sequelize.UUID,
+        type: Sequelize.UUID,  // Ensuring this is UUID to match users.id
         allowNull: false,
         references: {
           model: 'users',
@@ -30,7 +30,7 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       job_id: {
-        type: Sequelize.UUID,
+        type: Sequelize.UUID,  // Ensuring this is UUID to match jobs.id
         allowNull: true,
         references: {
           model: 'jobs',
@@ -105,11 +105,13 @@ module.exports = {
       },
       created_at: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       updated_at: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       }
     });
 

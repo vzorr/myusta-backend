@@ -14,7 +14,7 @@ module.exports = {
           primaryKey: true
         },
         user_id: {
-          type: Sequelize.UUID,
+          type: Sequelize.UUID,  // Ensuring this is UUID to match users.id
           allowNull: false,
           references: {
             model: 'users',
