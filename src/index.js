@@ -1,4 +1,4 @@
-// src/index.js with enhanced error logging and API information display
+// src/index.js - Updated for external Swagger access
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -142,8 +142,20 @@ app.use(morgan((tokens, req, res) => {
 
 // Middleware
 try {
-  app.use(cors());
-  console.log('[INFO] CORS middleware initialized');
+  // Enhanced CORS configuration for better external access
+  const corsOptions = {
+    origin: '*', // Allow all origins
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  };
+  app.use(cors(corsOptions));
+  console.log('[INFO] CORS middleware initialized with access from all origins');
+  
+  // Handle preflight requests explicitly
+  app.options('*', cors(corsOptions));
   
   app.use(express.json({ limit: '50mb' }));
   console.log('[INFO] JSON body parser initialized');
@@ -298,9 +310,9 @@ const startServer = async () => {
       process.exit(1);
     }
     
-     // Set up Swagger documentation 
-     setupSwagger(app);
-     console.log('[INFO] Swagger documentation initialized');
+    // Set up Swagger documentation 
+    setupSwagger(app);
+    console.log('[INFO] Swagger documentation initialized');
 
     // Set up routes
     console.log('[INFO] Setting up application routes');
@@ -317,11 +329,15 @@ const startServer = async () => {
     app.use(notFoundHandler);
     app.use(errorHandler);
     
-    // Start listening
-    app.listen(PORT, () => {
+    // Start listening on all network interfaces (0.0.0.0)
+    app.listen(PORT, '0.0.0.0', () => {
       const serverUrl = `${BASE_URL}:${PORT}`;
       logger.info(`Server running on ${serverUrl}`);
       console.log(`[INFO] Server running on ${serverUrl}`);
+      console.log(`[INFO] Server is bound to all network interfaces (0.0.0.0)`);
+      console.log(`[INFO] Access Swagger documentation at:`);
+      console.log(`   - ${serverUrl}/api-docs`);
+      console.log(`   - ${serverUrl}/api/docs`);
       
       // Display API information after server starts
       console.log('\n=== SERVER INFORMATION ===');
