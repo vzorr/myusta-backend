@@ -82,6 +82,57 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+
+    // Average rating field (calculated from individual ratings)
+averageRating: {
+  type: DataTypes.FLOAT,
+  defaultValue: 0,
+  validate: {
+    min: 0,
+    max: 5
+  }
+},
+
+// Total number of ratings received
+totalRatings: {
+  type: DataTypes.INTEGER,
+  defaultValue: 0
+},
+
+// Fields for popularity metrics
+totalHires: {
+  type: DataTypes.INTEGER,
+  defaultValue: 0
+},
+
+totalViews: {
+  type: DataTypes.INTEGER,
+  defaultValue: 0
+},
+
+// Last time the usta was hired, useful for activity indicators
+lastHiredAt: {
+  type: DataTypes.DATE,
+  allowNull: true
+},
+
+// Fields for featured or verified status
+isVerified: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false
+},
+
+isFeatured: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false
+},
+
+// Optional field for search boosting
+searchBoost: {
+  type: DataTypes.INTEGER,
+  defaultValue: 0
+}
+
   }, {
     indexes: [
     ],

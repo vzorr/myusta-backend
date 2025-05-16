@@ -2,13 +2,22 @@
   "name": "myusta-backend",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
+"scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "sequelize": "sequelize",
     "db:migrate": "sequelize db:migrate --env $NODE_ENV --config src/config/config.js --migrations-path src/migrations",
+    "db:migrate:undo": "sequelize db:migrate:undo --env $NODE_ENV --config src/config/config.js --migrations-path src/migrations",
+    "db:migrate:undo:all": "sequelize db:migrate:undo:all --env $NODE_ENV --config src/config/config.js --migrations-path src/migrations",
     "db:seed": "sequelize db:seed:all --env $NODE_ENV --config src/config/config.js --seeders-path src/seeders",
-    "db:rollback": "sequelize db:migrate:undo --env $NODE_ENV --config src/config/config.js --migrations-path src/migrations"
+    "db:seed:undo": "sequelize db:seed:undo:all --env $NODE_ENV --config src/config/config.js --seeders-path src/seeders",
+    "db:rollback": "sequelize db:migrate:undo --env $NODE_ENV --config src/config/config.js --migrations-path src/migrations",
+    "db:create": "sequelize db:create --env $NODE_ENV --config src/config/config.js",
+    "db:drop": "sequelize db:drop --env $NODE_ENV --config src/config/config.js",
+    "db:reset": "npm run db:drop && npm run db:create && npm run db:migrate && npm run db:seed",
+    "migration:generate": "sequelize migration:generate --name",
+    "seed:generate": "sequelize seed:generate --name",
+    "db:status": "sequelize db:migrate:status --env $NODE_ENV --config src/config/config.js --migrations-path src/migrations"
   },
   "sequelize": {
     "config": "src/config/config.js",
