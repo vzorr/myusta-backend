@@ -28,7 +28,9 @@ const {
   SavedJob,
   JobProposal,
   Milestone,
-  Contract
+  Contract,
+  Rating,        // Add this line
+  Invitation     // Add this line
 } = db;
 
 // User ↔ Job
@@ -95,6 +97,38 @@ Contract.belongsTo(User, { foreignKey: 'createdBy', as: 'customer' });
 Contract.belongsTo(JobProposal, { foreignKey: 'jobProposalId', as: 'JobProposal' });
 
 JobProposal.hasOne(Contract, { foreignKey: 'jobProposalId', as: 'contract' });
+
+
+
+// Rating associations
+User.hasMany(Rating, { foreignKey: 'ustaId', as: 'receivedRatings' });
+Rating.belongsTo(User, { foreignKey: 'ustaId', as: 'usta' });
+
+User.hasMany(Rating, { foreignKey: 'customerId', as: 'givenRatings' });
+Rating.belongsTo(User, { foreignKey: 'customerId', as: 'customer' });
+
+Job.hasOne(Rating, { foreignKey: 'jobId', as: 'rating' });
+Rating.belongsTo(Job, { foreignKey: 'jobId', as: 'job' });
+
+// Invitation associations
+User.hasMany(Invitation, { foreignKey: 'ustaId', as: 'receivedInvitations' });
+Invitation.belongsTo(User, { foreignKey: 'ustaId', as: 'usta' });
+
+User.hasMany(Invitation, { foreignKey: 'customerId', as: 'sentInvitations' });
+Invitation.belongsTo(User, { foreignKey: 'customerId', as: 'customer' });
+
+Job.hasMany(Invitation, { foreignKey: 'jobId', as: 'invitations' });
+Invitation.belongsTo(Job, { foreignKey: 'jobId', as: 'job' });
+
+// If you added locationId to the Invitation model
+Location.hasMany(Invitation, { foreignKey: 'locationId', as: 'invitations' });
+Invitation.belongsTo(Location, { foreignKey: 'locationId', as: 'location' });
+
+// Self-reference for previous invitation (if you included previousInvitationId)
+Invitation.belongsTo(Invitation, { foreignKey: 'previousInvitationId', as: 'previousInvitation' });
+Invitation.hasMany(Invitation, { foreignKey: 'previousInvitationId', as: 'followUpInvitations' });
+
+
 
 // Sequelize setup
 db.sequelize = sequelize;
