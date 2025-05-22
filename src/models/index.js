@@ -31,7 +31,8 @@ const {
   Milestone,
   Contract,
   Rating,
-  Invitation
+  Invitation,
+  Category
 } = db;
 
 // User ↔ Job
@@ -126,6 +127,11 @@ Invitation.belongsTo(Location, { foreignKey: 'locationId', as: 'location' });
 // Self-reference for previous invitation (if you included previousInvitationId)
 Invitation.belongsTo(Invitation, { foreignKey: 'previousInvitationId', as: 'previousInvitation' });
 Invitation.hasMany(Invitation, { foreignKey: 'previousInvitationId', as: 'followUpInvitations' });
+
+// Category self-referencing associations
+Category.belongsTo(Category, { foreignKey: 'parentId', as: 'parent' });
+Category.hasMany(Category, { foreignKey: 'parentId', as: 'subcategories' });
+
 
 // Sequelize setup
 db.sequelize = sequelize;

@@ -18,7 +18,11 @@
     "migration:generate": "sequelize migration:generate --name --config src/config/config.js --migrations-path src/migrations",
     "seed:generate": "sequelize seed:generate --name --config src/config/config.js --seeders-path src/seeders",
     "db:status": "sequelize db:migrate:status --env development --config src/config/config.js --migrations-path src/migrations",
-    "db:migrate:specific": "sequelize db:migrate --env development --config src/config/config.js --migrations-path src/migrations --to"
+    "db:migrate:specific": "sequelize db:migrate --env development --config src/config/config.js --migrations-path src/migrations --to",
+    "db:seed:categories": "sequelize db:seed --seed 20250522100001-seed-categories.js --env development --config src/config/config.js --seeders-path src/seeders",
+    "db:seed:subcategories": "sequelize db:seed --seed 20250522100002-seed-subcategories.js --env development --config src/config/config.js --seeders-path src/seeders",
+    "db:seed:test-ustas": "sequelize db:seed --seed 20250522100003-seed-test-ustas.js --env development --config src/config/config.js --seeders-path src/seeders"
+
   },
   "sequelize": {
     "config": "src/config/config.js",

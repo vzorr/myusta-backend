@@ -50,12 +50,52 @@ const MILESTONE_STATUS = {
 
 // categories.js
 const CATEGORY = [
+  // MAIN CATEGORIES
   { key: 'plumber', name: 'Plumber' },
   { key: 'electrician', name: 'Electrician' },
   { key: 'carpenter', name: 'Carpenter' },
-  { key: 'cleaner', name: 'Cleaner' },
-  { key: 'painter', name: 'Painter' }
-]
+  { key: 'cleaner', name: 'Cleaning' },
+  { key: 'renovation', name: 'Renovation' },
+  { key: 'other', name: 'Other' },
+  
+  // PLUMBER SUBCATEGORIES
+  { key: 'pipe_fitter', name: 'Pipe Fitter' },
+  { key: 'drain_specialist', name: 'Drain Specialist' },
+  { key: 'bathroom_kitchen_installer', name: 'Bathroom Kitchen Installer' },
+  { key: 'irrigation_technician', name: 'Irrigation Technician' },
+  
+  // ELECTRICIAN SUBCATEGORIES
+  { key: 'lighting_specialist', name: 'Lighting Specialist' },
+  { key: 'wiring_technician', name: 'Wiring Technician' },
+  { key: 'solar_installer', name: 'Solar Installer' },
+  { key: 'security_system_installer', name: 'Security System Installer' },
+  
+  // CARPENTER SUBCATEGORIES
+  { key: 'furniture_builder', name: 'Furniture Builder' },
+  { key: 'cabinet_installer', name: 'Cabinet Installer' },
+  { key: 'flooring_specialist', name: 'Flooring Specialist' },
+  { key: 'deck_builder', name: 'Deck Builder' },
+  
+  // CLEANING SUBCATEGORIES
+  { key: 'house_cleaner', name: 'House Cleaner' },
+  { key: 'carpet_cleaner', name: 'Carpet Cleaner' },
+  { key: 'window_cleaner', name: 'Window Cleaner' },
+  { key: 'deep_cleaning_specialist', name: 'Deep Cleaning Specialist' },
+  { key: 'gutter_cleaner', name: 'Gutter Cleaner' },
+  
+  // RENOVATION SUBCATEGORIES
+  { key: 'general_contractor', name: 'General Contractor' },
+  { key: 'painter', name: 'Painter' },
+  { key: 'tiler', name: 'Tiler' },
+  { key: 'roofer', name: 'Roofer' },
+  
+  // OTHER SUBCATEGORIES
+  { key: 'locksmith', name: 'Locksmith' },
+  { key: 'gardener_landscaper', name: 'Gardener/ Landscaper' },
+  { key: 'pest_control_specialist', name: 'Pest Control Specialist' },
+  { key: 'hvac_technician', name: 'HVAC Technician' },
+  { key: 'curtain_blind_installer', name: 'Curtain/ Blind Installer' }
+];
 
 // Allowed category keys (e.g., ['plumber', 'electrician', ...])
 const ALLOWED_CATEGORY_KEYS = CATEGORY.map(category => category.key);
