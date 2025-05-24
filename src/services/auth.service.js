@@ -33,7 +33,8 @@ exports.login = async (email, password, role) => {
     }
 
     // Generate JWT token
-    const token = generateToken({ id: user.id, role: user.role });
+    const token = generateToken({ id: user.id, role: user.role , name: user.firstName + ' ' + user.lastName, email: user.email, phone: user.phone });
+
 
     return {
       success: true,
