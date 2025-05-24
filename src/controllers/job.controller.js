@@ -186,3 +186,56 @@ exports.getJobProposalDetails = async (req, res, next) => {
   }
 };
 
+
+// Get completed jobs for authenticated user
+exports.getUserCompletedJobs = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const queryParams = req.query;
+    
+    logger.info(`Fetching completed jobs for ${userRole} ID: ${userId}`);
+    
+    const result = userRole === 'customer' 
+      ? await jobService.getCustomerCompletedJobs(userId, queryParams)
+      : await jobService.getUstaCompletedJobs(userId, queryParams);
+
+    if (!result.success) {
+      logger.warn(`Failed to fetch completed jobs for ${userRole} ${userId}: ${result.message}`);
+      return errorResponse(res, result.message, result.errors, 500);
+    }
+
+    logger.info(`Completed jobs fetched successfully for ${userRole} ID: ${userId}`);
+    return successResponse(res, 'Completed jobs fetched successfully', result.data);
+  } catch (error) {
+    logger.error(`Unexpected error in getUserCompletedJobs: ${error.message}`, { stack: error.stack });
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};
+
+// Get active jobs for authenticated user
+exports.getUserActiveJobs = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const queryParams = req.query;
+    
+    logger.info(`Fetching active jobs for ${userRole} ID: ${userId}`);
+    
+    const result = userRole === 'customer' 
+      ? await jobService.getCustomerActiveJobs(userId, queryParams)
+      : await jobService.getUstaActiveJobs(userId, queryParams);
+
+    if (!result.success) {
+      logger.warn(`Failed to fetch active jobs for ${userRole} ${userId}: ${result.message}`);
+      return errorResponse(res, result.message, result.errors, 500);
+    }
+
+    logger.info(`Active jobs fetched successfully for ${userRole} ID: ${userId}`);
+    return successResponse(res, 'Active jobs fetched successfully', result.data);
+  } catch (error) {
+    logger.error(`Unexpected error in getUserActiveJobs: ${error.message}`, { stack: error.stack });
+    return next({ statusCode: 500, message: 'Internal server error' });
+  }
+};
+
