@@ -598,3 +598,307 @@ exports.getJobProposalDetails = async (proposalId) => {
     return { success: false, message: 'Database error', errors: [error.message] };
   }
 };
+
+
+// Get completed jobs for customer
+exports.getCustomerCompletedJobs = async (customerId, query) => {
+  try {
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await Job.findAndCountAll({
+      where: { 
+        userId: customerId,
+        status: 'completed'
+      },
+      include: [
+        {
+          model: Location,
+          as: 'location'
+        },
+        {
+          model: Rating,
+          as: 'rating',
+          required: false,
+          include: [{
+            model: User,
+            as: 'usta',
+            attributes: ['id', 'firstName', 'lastName']
+          }]
+        },
+        {
+          model: Contract,
+          as: 'contract',
+          required: false,
+          include: [{
+            model: User,
+            as: 'usta',
+            attributes: ['id', 'firstName', 'lastName', 'profilePicture']
+          }]
+        }
+      ],
+      order: [['endDate', 'DESC']],
+      limit,
+      offset
+    });
+
+    // Format the jobs with additional fields
+    const formattedJobs = rows.map(job => ({
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      budget: job.budget,
+      currency: 'ALL', // Default currency
+      rating: job.rating?.rating || null,
+      startDate: job.startDate,
+      endDate: job.endDate,
+      category: job.category,
+      paymentMethod: job.paymentMethod,
+      location: job.location,
+      images: job.images,
+      // Additional fields
+      usta: job.contract?.usta || null,
+      hasRating: !!job.rating,
+      ratingId: job.rating?.id || null
+    }));
+
+    return { 
+      success: true, 
+      data: formatPaginatedResponse({ rows: formattedJobs, count }, page, limit) 
+    };
+  } catch (error) {
+    logger.error(`Error fetching customer completed jobs: ${error.message}`);
+    return { 
+      success: false, 
+      message: 'Failed to fetch completed jobs', 
+      errors: [error.message] 
+    };
+  }
+};
+
+// Get active jobs for customer
+exports.getCustomerActiveJobs = async (customerId, query) => {
+  try {
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await Job.findAndCountAll({
+      where: { 
+        userId: customerId,
+        status: 'active'
+      },
+      include: [
+        {
+          model: Location,
+          as: 'location'
+        },
+        {
+          model: Contract,
+          as: 'contract',
+          required: false,
+          where: { status: 'accepted' },
+          include: [{
+            model: User,
+            as: 'usta',
+            attributes: ['id', 'firstName', 'lastName', 'profilePicture', 'phone']
+          }]
+        },
+        {
+          model: JobProposal,
+          as: 'proposals',
+          where: { status: 'accepted' },
+          required: false
+        }
+      ],
+      order: [['startDate', 'ASC']],
+      limit,
+      offset
+    });
+
+    // Format the jobs
+    const formattedJobs = rows.map(job => ({
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      budget: job.budget,
+      currency: 'ALL',
+      startDate: job.startDate,
+      endDate: job.endDate,
+      category: job.category,
+      paymentMethod: job.paymentMethod,
+      location: job.location,
+      images: job.images,
+      // Additional fields for active jobs
+      usta: job.contract?.usta || null,
+      contractId: job.contract?.id || null,
+      progress: calculateJobProgress(job), // Helper function to calculate progress
+      daysRemaining: calculateDaysRemaining(job.endDate)
+    }));
+
+    return { 
+      success: true, 
+      data: formatPaginatedResponse({ rows: formattedJobs, count }, page, limit) 
+    };
+  } catch (error) {
+    logger.error(`Error fetching customer active jobs: ${error.message}`);
+    return { 
+      success: false, 
+      message: 'Failed to fetch active jobs', 
+      errors: [error.message] 
+    };
+  }
+};
+
+// Get completed jobs for usta
+exports.getUstaCompletedJobs = async (ustaId, query) => {
+  try {
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await Contract.findAndCountAll({
+      where: { 
+        ustaId,
+        status: 'accepted'
+      },
+      include: [{
+        model: Job,
+        as: 'job',
+        where: { status: 'completed' },
+        include: [
+          {
+            model: User,
+            as: 'customer',
+            attributes: ['id', 'firstName', 'lastName', 'profilePicture']
+          },
+          {
+            model: Location,
+            as: 'location'
+          },
+          {
+            model: Rating,
+            as: 'rating',
+            required: false,
+            where: { ustaId }
+          }
+        ]
+      }],
+      order: [[{ model: Job, as: 'job' }, 'endDate', 'DESC']],
+      limit,
+      offset
+    });
+
+    // Format the jobs
+    const formattedJobs = rows.map(contract => ({
+      id: contract.job.id,
+      title: contract.job.title,
+      description: contract.job.description,
+      budget: contract.totalCost,
+      currency: 'ALL',
+      rating: contract.job.rating?.rating || null,
+      startDate: contract.startDate,
+      endDate: contract.endDate,
+      customer: contract.job.customer,
+      location: contract.job.location,
+      hasRating: !!contract.job.rating,
+      earnings: calculateEarnings(contract.totalCost) // After service fee deduction
+    }));
+
+    return { 
+      success: true, 
+      data: formatPaginatedResponse({ rows: formattedJobs, count }, page, limit) 
+    };
+  } catch (error) {
+    logger.error(`Error fetching usta completed jobs: ${error.message}`);
+    return { 
+      success: false, 
+      message: 'Failed to fetch completed jobs', 
+      errors: [error.message] 
+    };
+  }
+};
+
+// Get active jobs for usta
+exports.getUstaActiveJobs = async (ustaId, query) => {
+  try {
+    const { page, limit, offset } = getPaginationParams(query);
+
+    const { count, rows } = await Contract.findAndCountAll({
+      where: { 
+        ustaId,
+        status: 'accepted'
+      },
+      include: [{
+        model: Job,
+        as: 'job',
+        where: { status: 'active' },
+        include: [
+          {
+            model: User,
+            as: 'customer',
+            attributes: ['id', 'firstName', 'lastName', 'profilePicture', 'phone']
+          },
+          {
+            model: Location,
+            as: 'location'
+          }
+        ]
+      }],
+      order: [[{ model: Job, as: 'job' }, 'startDate', 'ASC']],
+      limit,
+      offset
+    });
+
+    // Format the jobs
+    const formattedJobs = rows.map(contract => ({
+      id: contract.job.id,
+      title: contract.job.title,
+      description: contract.job.description,
+      budget: contract.totalCost,
+      currency: 'ALL',
+      startDate: contract.startDate,
+      endDate: contract.endDate,
+      customer: contract.job.customer,
+      location: contract.job.location,
+      contractId: contract.id,
+      progress: calculateJobProgress(contract.job),
+      daysRemaining: calculateDaysRemaining(contract.endDate),
+      estimatedEarnings: calculateEarnings(contract.totalCost)
+    }));
+
+    return { 
+      success: true, 
+      data: formatPaginatedResponse({ rows: formattedJobs, count }, page, limit) 
+    };
+  } catch (error) {
+    logger.error(`Error fetching usta active jobs: ${error.message}`);
+    return { 
+      success: false, 
+      message: 'Failed to fetch active jobs', 
+      errors: [error.message] 
+    };
+  }
+};
+
+// Helper functions
+function calculateJobProgress(job) {
+  const now = new Date();
+  const start = new Date(job.startDate);
+  const end = new Date(job.endDate);
+  
+  if (now < start) return 0;
+  if (now > end) return 100;
+  
+  const total = end - start;
+  const elapsed = now - start;
+  return Math.round((elapsed / total) * 100);
+}
+
+function calculateDaysRemaining(endDate) {
+  const now = new Date();
+  const end = new Date(endDate);
+  const diff = end - now;
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
+function calculateEarnings(totalCost) {
+  const serviceFeePercentage = 0.1; // 10% service fee
+  return totalCost * (1 - serviceFeePercentage);
+}
+
